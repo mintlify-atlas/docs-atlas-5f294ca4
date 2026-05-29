@@ -1,0 +1,159 @@
+---
+title: "Java Access Modifiers: public, private, and protected"
+sidebarTitle: "Access Modifiers"
+description: "Learn how Java's public, private, and protected modifiers control class member visibility and protect data integrity in OOP design."
+---
+
+Access modifiers are one of the first tools Java gives you to control who can see and change the internals of your classes. By annotating every field, method, or constructor with a visibility keyword, you communicate intent — and let the compiler enforce it. Getting this right from the start is the difference between a class that's easy to maintain and one that becomes a source of subtle bugs as a codebase grows.
+
+## What Are Access Modifiers?
+
+Every member of a class (field, method, constructor) has a visibility level. Java provides four options, ranging from completely open to completely private. When you omit a modifier, Java uses **package-private** (the default), which sits between `private` and `protected` in terms of openness.
+
+| Modifier | Same class | Same package | Subclass | Other packages |
+|---|---|---|---|---|
+| `public` | ✅ | ✅ | ✅ | ✅ |
+| `protected` | ✅ | ✅ | ✅ | ❌ |
+| *(package-private)* | ✅ | ✅ | ❌ | ❌ |
+| `private` | ✅ | ❌ | ❌ | ❌ |
+
+---
+
+## `public` — Accessible from Anywhere
+
+A `public` member is visible to all code in the entire program, regardless of package or class hierarchy. Use it for the API that other classes are explicitly meant to call — constructors, service methods, and fields that are genuinely meant to be shared.
+
+```java
+// ✅ Accessible from any class in any package
+public String nombre;
+```
+
+In the `Empleado` class from Taller 7, `nombre` is declared `public` to allow direct read/write access from outside the class:
+
+```java
+public class Empleado {
+
+    // ✅ PUBLIC: nombre is directly accessible
+    public String nombre;
+
+    // ✅ PRIVATE: salario is protected behind getter/setter
+    private double salario;
+
+    public Empleado(String nombre, double salario) {
+        this.nombre = nombre;
+        setSalario(salario); // uses setter for validation
+    }
+
+    public double getSalario() {
+        return salario;
+    }
+
+    public void setSalario(double nuevoSalario) {
+        if (nuevoSalario > 0) {
+            this.salario = nuevoSalario;
+            System.out.println("✅ Salario actualizado correctamente: $"
+                    + String.format("%.2f", nuevoSalario));
+        } else {
+            System.out.println("❌ Error: El salario debe ser mayor a 0. "
+                    + "Salario no actualizado.");
+        }
+    }
+
+    public void mostrarInformacion() {
+        System.out.println("Nombre: " + nombre);
+        System.out.println("Salario: $" + String.format("%.2f", salario));
+    }
+
+    public double calcularBonoAnual() {
+        return salario * 0.10;
+    }
+}
+```
+
+Because `nombre` is public, calling code can read or write it directly:
+
+```java
+Empleado emp = new Empleado("Juan García", 2500.0);
+
+// Direct access — allowed because nombre is public
+System.out.println(emp.nombre);    // read
+emp.nombre = "Juan Carlos García"; // write — no setter needed
+```
+
+---
+
+## `private` — Accessible Only Within the Declaring Class
+
+A `private` member is the most restrictive level. Only code inside the same class file can reach it. Any attempt from outside — even a subclass — causes a compile-time error.
+
+```java
+// ✅ Only accessible inside Empleado
+private double salario;
+```
+
+Keeping `salario` private forces all changes to go through `setSalario()`, where the positive-value check lives. Without `private`, nothing stops a caller from writing `emp.salario = -9999;` and silently corrupting the object's state.
+
+```java
+// ❌ This will NOT compile — salario is private
+double s = emp.salario; // error: salario has private access in Empleado
+
+// ✅ Use the getter instead
+double s = emp.getSalario();
+```
+
+---
+
+## `protected` — Accessible Within the Package and Subclasses
+
+`protected` is the right choice when a field or method belongs to an inheritance hierarchy and subclasses need direct access, but outside code should stay out. The `Vehiculo` superclass in Taller 8 uses `protected` for `marca` and `velocidadMaxima` so that the `Coche` subclass can read them in its own methods:
+
+```java
+// taller8/ejercicio1/Vehiculo.java
+public class Vehiculo {
+
+    // protected: accessible in subclasses like Coche
+    protected String marca;
+    protected double velocidadMaxima;
+
+    public Vehiculo(String marca, double velocidadMaxima) {
+        this.marca = marca;
+        this.velocidadMaxima = velocidadMaxima;
+    }
+
+    public void mostrarInfo() {
+        System.out.println("Marca: " + marca);
+        System.out.println("Velocidad Máxima: " + velocidadMaxima + " km/h");
+    }
+}
+```
+
+```java
+// taller8/ejercicio1/Coche.java
+public class Coche extends Vehiculo {
+
+    private int numeroDePuertas;
+
+    public Coche(String marca, double velocidadMaxima, int numeroDePuertas) {
+        super(marca, velocidadMaxima);
+        this.numeroDePuertas = numeroDePuertas;
+    }
+
+    @Override
+    public void mostrarInfo() {
+        super.mostrarInfo(); // reuses parent output
+        System.out.println("Número de Puertas: " + numeroDePuertas);
+    }
+}
+```
+
+`Coche` can reference `marca` and `velocidadMaxima` directly because they are `protected`. Code in a completely unrelated class, however, cannot touch those fields.
+
+---
+
+## Rule of Thumb: Default to `private`
+
+When in doubt, start with `private`. Make only the minimum surface area `public`. This principle — sometimes called *least privilege* — keeps your classes easy to change later: if `salario` is private, you can add logging, rounding, or currency conversion inside `setSalario()` without touching any caller.
+
+<Note>
+Setter validation is not optional polish — it is the entire reason for making a field `private` in the first place. A setter without validation is just extra typing. Always add a guard clause (like `if (nuevoSalario > 0)`) to enforce the invariants your class must maintain.
+</Note>

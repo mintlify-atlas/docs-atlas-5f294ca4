@@ -1,0 +1,160 @@
+---
+title: "Ejercicio 3: Overriding Pitfalls — Overloading vs Overriding"
+sidebarTitle: "Override Pitfalls"
+description: "See how changing a method's signature accidentally creates an overload instead of an override, and why omitting @Override makes such bugs invisible."
+---
+
+Ejercicio 3 documents two common mistakes developers make when trying to override methods. The first mistake is changing the parameter list when redefining a method in a subclass — this silently creates an overload rather than an override, so the parent's original method is never replaced and polymorphic dispatch never reaches the new definition. The second mistake is omitting `@Override` from a correctly-written override — the code works today, but the compiler cannot protect you if the parent's signature changes tomorrow. A third scenario, shown as commented-out code, demonstrates what happens when you use `@Override` with the wrong signature: an immediate compile error that tells you exactly what went wrong.
+
+## Pitfall 1 — Signature Change Creates an Overload, Not an Override
+
+`ClaseDerivadaT10` tries to "override" `metodoSobrescrito()` by adding an `int` parameter:
+
+```java
+// In ClaseDerivadaT10
+public void metodoSobrescrito(int numero) {
+    System.out.println("Método sobrecargado de ClaseDerivadaT10 con número: " + numero);
+}
+```
+
+This does **not** override `ClaseBaseT10.metodoSobrescrito()`. The base class method takes zero parameters; this new method takes one. Java treats them as two separate, unrelated methods. When a `ClaseBaseT10` reference points to a `ClaseDerivadaT10` instance and `metodoSobrescrito()` is called, the JVM dispatches to the override with no parameters — the `int` version is unreachable through a parent-type reference.
+
+If a developer added `@Override` to this method, the compiler would immediately reject it:
+
+```
+error: method does not override or implement a method from a supertype
+```
+
+That compile error is the fast-feedback you want. Without `@Override`, the bug is invisible.
+
+## Pitfall 2 — Omitting `@Override`
+
+`ClaseDerivadaT10` also defines a zero-parameter `metodoSobrescrito()` **without** `@Override`:
+
+```java
+// In ClaseDerivadaT10 — correct signature, missing annotation
+public void metodoSobrescrito() {
+    System.out.println("Método sobrescrito de ClaseDerivadaT10 (sin @Override).");
+}
+```
+
+This **is** a genuine override — the signatures match and dynamic dispatch works correctly. However, removing `@Override` means the compiler will not verify the relationship. If a future refactor renames or changes the parameters of `metodoSobrescrito()` in `ClaseBaseT10`, the subclass method silently becomes an unrelated new method rather than an override. No compile error, no warning — just a subtle behaviour change at runtime.
+
+## Pitfall 3 — `@Override` With a Different Signature Fails at Compile Time (Intentionally)
+
+The source file contains a commented-out block that shows the correct way `@Override` protects you:
+
+```java
+/*
+@Override
+public void metodoConParametro() { // Error: la firma no coincide con el método de la superclase
+    System.out.println("Esto daría un error de compilación si se descomenta.");
+}
+*/
+```
+
+`ClaseBaseT10.metodoConParametro` takes a `String` parameter. The commented attempt declares it with no parameters and uses `@Override`. Uncommenting this block immediately produces a compile error because there is no zero-parameter `metodoConParametro` in the superclass hierarchy to override. The annotation does exactly its job: catch the mismatch before the program ever runs.
+
+## Full Source
+
+### `ClaseBaseT10` and `ClaseDerivadaT10`
+
+```java
+package Taller10;
+
+class ClaseBaseT10 {
+    public void metodoSobrescrito() {
+        System.out.println("Método sobrescrito de ClaseBaseT10.");
+    }
+
+    public void metodoConParametro(String mensaje) {
+        System.out.println("Método con parámetro de ClaseBaseT10: " + mensaje);
+    }
+}
+
+class ClaseDerivadaT10 extends ClaseBaseT10 {
+    // 1. Intento de sobrescribir cambiando la firma (esto es sobrecarga, no sobrescritura)
+    // Si se intenta usar @Override aquí, daría error de compilación.
+    public void metodoSobrescrito(int numero) {
+        System.out.println("Método sobrecargado de ClaseDerivadaT10 con número: " + numero);
+    }
+
+    // 2. Sobrescritura correcta pero sin la anotación @Override (mala práctica)
+    public void metodoSobrescrito() {
+        System.out.println("Método sobrescrito de ClaseDerivadaT10 (sin @Override).");
+    }
+
+    // Demostración de error si se intenta sobrescribir con firma diferente y @Override
+    /*
+    @Override
+    public void metodoConParametro() { // Error: la firma no coincide con el método de la superclase
+        System.out.println("Esto daría un error de compilación si se descomenta.");
+    }
+    */
+}
+```
+
+### `MainEjercicio3T10`
+
+```java
+package Taller10;
+
+public class MainEjercicio3T10 {
+    public static void main(String[] args) {
+        System.out.println("\n--- Demostración de Uso Incorrecto de Sobrescritura (Ejercicio 3) ---");
+
+        ClaseBaseT10 base = new ClaseBaseT10();
+        ClaseDerivadaT10 derivada = new ClaseDerivadaT10();
+
+        System.out.println("\n--- Caso 1: Sobrecarga vs Sobrescritura (cambio de firma) ---");
+        base.metodoSobrescrito();        // Calls ClaseBaseT10's version
+        derivada.metodoSobrescrito();    // Calls ClaseDerivadaT10's override (no @Override)
+        derivada.metodoSobrescrito(10);  // Calls the overloaded version — NOT an override
+        System.out.println("Explicación: El método con 'int numero' en ClaseDerivadaT10 es una sobrecarga, no una sobrescritura, porque su firma es diferente. Si se hubiera usado @Override, habría un error de compilación.");
+
+        System.out.println("\n--- Caso 2: Sobrescritura sin @Override ---");
+        System.out.println("Explicación: El método 'metodoSobrescrito()' en ClaseDerivadaT10 sobrescribe correctamente el de la clase base, pero la ausencia de @Override significa que el compilador no verificará si realmente estás sobrescribiendo un método existente. Esto puede llevar a errores difíciles de detectar si la firma del método en la clase base cambia en el futuro.");
+
+        System.out.println("\n--- Caso 3: Intento de sobrescribir con firma diferente y @Override (comentado) ---");
+        System.out.println("Si se descomentara el bloque de código con '@Override public void metodoConParametro()', el compilador generaría un error indicando que no hay un método con esa firma en la superclase para sobrescribir.");
+    }
+}
+```
+
+## Summary
+
+| Scenario | Is it an override? | `@Override` behaviour |
+|---|---|---|
+| Same name, same params | ✅ Yes | Accepted, no error |
+| Same name, different params | ❌ No — it's an overload | Would cause a compile error if used |
+| Same name, same params, no `@Override` | ✅ Yes | Accepted — compiler won't verify |
+
+<Tip>Always use `@Override`. If the annotation is present but the signatures don't match, the compiler immediately tells you — catching the bug at build time rather than at runtime where it can be nearly impossible to trace.</Tip>
+
+## Compile & Run
+
+```bash
+# Compile from the project root
+javac Taller10/MainEjercicio3T10.java
+
+# Run
+java Taller10.MainEjercicio3T10
+```
+
+**Full expected output:**
+
+```
+--- Demostración de Uso Incorrecto de Sobrescritura (Ejercicio 3) ---
+
+--- Caso 1: Sobrecarga vs Sobrescritura (cambio de firma) ---
+Método sobrescrito de ClaseBaseT10.
+Método sobrescrito de ClaseDerivadaT10 (sin @Override).
+Método sobrecargado de ClaseDerivadaT10 con número: 10
+Explicación: El método con 'int numero' en ClaseDerivadaT10 es una sobrecarga, no una sobrescritura, porque su firma es diferente. Si se hubiera usado @Override, habría un error de compilación.
+
+--- Caso 2: Sobrescritura sin @Override ---
+Explicación: El método 'metodoSobrescrito()' en ClaseDerivadaT10 sobrescribe correctamente el de la clase base, pero la ausencia de @Override significa que el compilador no verificará si realmente estás sobrescribiendo un método existente. Esto puede llevar a errores difíciles de detectar si la firma del método en la clase base cambia en el futuro.
+
+--- Caso 3: Intento de sobrescribir con firma diferente y @Override (comentado) ---
+Si se descomentara el bloque de código con '@Override public void metodoConParametro()', el compilador generaría un error indicando que no hay un método con esa firma en la superclase para sobrescribir.
+```

@@ -1,0 +1,279 @@
+---
+title: "Ejercicio 3: Empleado and Gerente — Overriding calcularBono()"
+sidebarTitle: "Empleado & Gerente"
+description: "Override calcularBono() in Gerente to compute a higher bonus (15% base + 2% per managed employee) while inheriting Empleado's core behavior."
+---
+
+Ejercicio 3 demonstrates the most common reason to override a method: a subclass needs a different computation for the same concept. Every `Empleado` earns a 10% annual bonus. A `Gerente` is also an employee, so it inherits `Empleado`'s fields and general behaviour, but receives a larger bonus — 15% of salary as a base, plus an extra 2% of salary for every direct report it manages. The `@Override` annotation on `calcularBono()` makes the compiler verify the signature matches, and polymorphic dispatch ensures that code operating on an `Empleado` reference automatically calls the right formula at runtime.
+
+## Inheritance hierarchy
+
+```
+Empleado
+  └── extends ──> Gerente
+```
+
+## Empleado — base class
+
+```java
+package ejercicio3;
+
+/**
+ * Clase base que representa un empleado
+ */
+public class Empleado {
+
+    // Atributos protegidos
+    protected String nombre;
+    protected double salario;
+
+    /**
+     * Constructor de la clase Empleado
+     * @param nombre Nombre del empleado
+     * @param salario Salario mensual del empleado
+     */
+    public Empleado(String nombre, double salario) {
+        this.nombre = nombre;
+        this.salario = salario;
+    }
+
+    /**
+     * Método para mostrar los detalles del empleado
+     */
+    public void mostrarDetalles() {
+        System.out.println("--- Detalles del Empleado ---");
+        System.out.println("Nombre: " + nombre);
+        System.out.println("Salario: $" + String.format("%.2f", salario));
+    }
+
+    /**
+     * Método para calcular el bono anual del empleado (10% del salario)
+     * @return El bono anual
+     */
+    public double calcularBono() {
+        return salario * 0.10;
+    }
+
+    /**
+     * Método para realizar trabajo
+     */
+    public void trabajar() {
+        System.out.println(nombre + " está trabajando...");
+    }
+
+    /**
+     * Método para registrar entrada
+     */
+    public void registrarAsistencia() {
+        System.out.println(nombre + " ha llegado a trabajar");
+    }
+
+    // Getters y Setters
+    public String getNombre()           { return nombre; }
+    public double getSalario()          { return salario; }
+    public void setSalario(double s)    { this.salario = s; }
+}
+```
+
+`calcularBono()` on a plain `Empleado` is simply:
+
+```
+bono = salario × 0.10
+```
+
+## Gerente — derived class
+
+```java
+package ejercicio3;
+
+/**
+ * Clase que hereda de Empleado y representa un gerente
+ */
+public class Gerente extends Empleado {
+
+    // Atributo específico del gerente
+    private String departamento;
+    private int empleadosAsuCargo;
+
+    /**
+     * Constructor de la clase Gerente
+     * @param nombre Nombre del gerente
+     * @param salario Salario del gerente
+     * @param departamento Departamento que dirige
+     */
+    public Gerente(String nombre, double salario, String departamento) {
+        // Llamamos al constructor de la clase base
+        super(nombre, salario);
+        this.departamento = departamento;
+        this.empleadosAsuCargo = 0;
+    }
+
+    /**
+     * Constructor sobrecargado con empleados a cargo
+     */
+    public Gerente(String nombre, double salario, String departamento, int empleadosAsuCargo) {
+        super(nombre, salario);
+        this.departamento = departamento;
+        this.empleadosAsuCargo = empleadosAsuCargo;
+    }
+
+    /**
+     * Sobrescribimos el método mostrarDetalles de Empleado
+     * Agregamos información específica del gerente
+     */
+    @Override
+    public void mostrarDetalles() {
+        System.out.println("--- Detalles del Gerente ---");
+        System.out.println("Nombre: " + nombre);
+        System.out.println("Salario: $" + String.format("%.2f", salario));
+        System.out.println("Departamento: " + departamento);
+        System.out.println("Empleados a su cargo: " + empleadosAsuCargo);
+    }
+
+    /**
+     * Sobrescribimos el método calcularBono
+     * El gerente recibe un bono mayor (15% del salario)
+     */
+    @Override
+    public double calcularBono() {
+        // Bono base del 15% más 2% por cada empleado a cargo
+        double bonoBase = salario * 0.15;
+        double bonoEmpleados = salario * 0.02 * empleadosAsuCargo;
+        return bonoBase + bonoEmpleados;
+    }
+
+    /**
+     * Método específico del gerente: supervisar
+     */
+    public void supervisar() {
+        System.out.println(nombre + " está supervisando al equipo del departamento " + departamento);
+    }
+
+    /**
+     * Método específico del gerente: asignar responsabilidades
+     */
+    public void asignarResponsabilidades(String tarea, String empleado) {
+        System.out.println(nombre + " asignó la tarea '" + tarea + "' a " + empleado);
+    }
+
+    /**
+     * Método específico del gerente: hacer reunión
+     */
+    public void hacerReunion() {
+        System.out.println(nombre + " está haciendo una reunión con su equipo del departamento " + departamento);
+    }
+
+    /**
+     * Método específico del gerente: aprobar presupuesto
+     */
+    public void aprobarPresupuesto(double monto) {
+        System.out.println(nombre + " aprobó un presupuesto de $" + String.format("%.2f", monto) +
+                         " para el departamento " + departamento);
+    }
+
+    /**
+     * Método para dar ascenso a un empleado
+     */
+    public void darAscenso(String nombreEmpleado) {
+        System.out.println(nombre + " le dio ascenso a " + nombreEmpleado);
+    }
+
+    // Getters y Setters
+    public String getDepartamento()              { return departamento; }
+    public int getEmpleadosAsuCargo()            { return empleadosAsuCargo; }
+    public void setEmpleadosAsuCargo(int n)      { this.empleadosAsuCargo = n; }
+}
+```
+
+### Manager-only methods
+
+| Method | Signature | Purpose |
+|---|---|---|
+| `supervisar()` | `void` | Announces team supervision |
+| `asignarResponsabilidades()` | `(String tarea, String empleado)` | Delegates a named task to a named employee |
+| `hacerReunion()` | `void` | Holds a team meeting |
+| `aprobarPresupuesto()` | `(double monto)` | Approves a budget amount for the department |
+| `darAscenso()` | `(String nombreEmpleado)` | Promotes a named employee |
+
+## calcularBono() — side-by-side comparison
+
+| | `Empleado` | `Gerente` |
+|---|---|---|
+| **Formula** | `salario × 0.10` | `(salario × 0.15) + (salario × 0.02 × empleadosAsuCargo)` |
+| **Base rate** | 10% | 15% |
+| **Headcount bonus** | None | +2% per direct report |
+| **Example** (salario = $6 000, 8 reports) | $600.00 | $900.00 + $960.00 = **$1 860.00** |
+
+The formula in code:
+```java
+double bonoBase      = salario * 0.15;
+double bonoEmpleados = salario * 0.02 * empleadosAsuCargo;
+return bonoBase + bonoEmpleados;
+```
+
+## Usage example
+
+```java
+// Regular employee — 10% bonus
+Empleado emp = new Empleado("Roberto Pérez", 2000.0);
+emp.mostrarDetalles();
+System.out.println("Bono: $" + String.format("%.2f", emp.calcularBono()));
+// Bono: $200.00
+
+// Manager without direct reports — 15% base only
+Gerente gerente1 = new Gerente("Alejandro López", 5000.0, "Recursos Humanos");
+gerente1.mostrarDetalles();
+System.out.println("Bono: $" + String.format("%.2f", gerente1.calcularBono()));
+// Bono: $750.00
+
+// Manager with 8 direct reports — 15% + (2% × 8)
+Gerente gerente2 = new Gerente("Mariana González", 6000.0, "Tecnología", 8);
+System.out.println("Bono: $" + String.format("%.2f", gerente2.calcularBono()));
+// Bono: $1860.00
+
+// Manager-specific methods
+gerente2.hacerReunion();
+gerente2.aprobarPresupuesto(15000.0);
+gerente2.asignarResponsabilidades("Desarrollar API", "Dev Team");
+gerente1.darAscenso("Juan Martínez");
+
+// Polymorphism — array of Empleado holds Gerente objects
+Empleado[] todos = {
+    new Empleado("Juan Rodríguez", 2300.0),
+    new Gerente("Carlos Ruiz", 4800.0, "Ventas", 5),
+    new Gerente("Elena Morales", 5500.0, "Marketing", 6)
+};
+for (Empleado e : todos) {
+    e.mostrarDetalles();                                               // correct override called
+    System.out.println("Bono: $" + String.format("%.2f", e.calcularBono()));
+}
+```
+
+## Compile & run
+
+```bash
+cd taller8
+javac ejercicio3/Empleado.java ejercicio3/Gerente.java ejercicio3/PruebaEjercicio3.java
+java ejercicio3.PruebaEjercicio3
+```
+
+Expected output (abridged):
+```
+========== EJERCICIO 3: EMPLEADO Y GERENTE ==========
+
+1. Creando empleados regulares:
+--- Detalles del Empleado ---
+Nombre: Roberto Pérez
+Salario: $2000.00
+Bono anual: $200.00
+
+==================================================
+
+4. Gerente con empleados a cargo:
+--- Detalles del Gerente ---
+Nombre: Mariana González
+Salario: $6000.00
+Departamento: Tecnología
+Empleados a su cargo: 8
+Bono anual: $1860.00
+```

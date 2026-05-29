@@ -1,0 +1,164 @@
+---
+title: "Ejercicio 1: Empleado — public vs private Fields in Java"
+sidebarTitle: "Empleado"
+description: "Build the Empleado class using public and private access modifiers, a validated salary setter, bonus calculation, and salary raise methods."
+---
+
+Ejercicio 1 introduces the fundamental distinction between `public` and `private` fields by modelling a real-world employee. The `nombre` field is left `public` so callers can read and write it directly, while `salario` is declared `private` to ensure every change passes through a validated setter. This contrast makes the trade-offs between convenience and safety immediately visible in a single class.
+
+## Field Reference
+
+| Field | Type | Access | Description |
+|-------|------|--------|-------------|
+| `nombre` | `String` | `public` | Employee name — directly accessible and writable |
+| `salario` | `double` | `private` | Monthly salary — protected; read via `getSalario()`, written via `setSalario()` |
+
+## Constructor
+
+The constructor assigns `nombre` directly and delegates `salario` to `setSalario()` so that the validation logic is applied even on first construction:
+
+```java
+public Empleado(String nombre, double salario) {
+    this.nombre = nombre;
+    // Usamos el setter para aplicar validación
+    setSalario(salario);
+}
+```
+
+## Methods
+
+| Signature | Returns | Description |
+|-----------|---------|-------------|
+| `getSalario()` | `double` | Returns the current private salary value |
+| `setSalario(double nuevoSalario)` | `void` | Updates `salario` only when `nuevoSalario > 0`; prints an error message otherwise |
+| `mostrarInformacion()` | `void` | Prints the employee's name and formatted salary to stdout |
+| `calcularBonoAnual()` | `double` | Returns 10 % of the current salary |
+| `aumentarSalario(double porcentaje)` | `void` | Computes the raise and delegates to `setSalario()` for validation; rejects non-positive percentages |
+
+## Full Source — `Empleado.java`
+
+```java
+package Taller7.ejercicio_1;
+
+/**
+ * Clase que representa un empleado con propiedades nombre y salario
+ * Demuestra el uso correcto del modificador public
+ */
+public class Empleado {
+
+    // ✅ Atributo PÚBLICO: nombre es accesible directamente
+    public String nombre;
+
+    // ✅ Atributo PRIVADO: salario está protegido
+    private double salario;
+
+    /**
+     * Constructor público de la clase Empleado
+     * @param nombre Nombre del empleado
+     * @param salario Salario inicial del empleado
+     */
+    public Empleado(String nombre, double salario) {
+        this.nombre = nombre;
+        // Usamos el setter para aplicar validación
+        setSalario(salario);
+    }
+
+    /**
+     * Método GET público para obtener el salario
+     * @return El salario del empleado
+     */
+    public double getSalario() {
+        return salario;
+    }
+
+    /**
+     * Método SET público para establecer el salario
+     * ✅ Incluye validación: el salario debe ser positivo
+     * @param nuevoSalario El nuevo salario del empleado
+     */
+    public void setSalario(double nuevoSalario) {
+        if (nuevoSalario > 0) {
+            this.salario = nuevoSalario;
+            System.out.println("✅ Salario actualizado correctamente: $" +
+                             String.format("%.2f", nuevoSalario));
+        } else {
+            System.out.println("❌ Error: El salario debe ser mayor a 0. " +
+                             "Salario no actualizado.");
+        }
+    }
+
+    /**
+     * Método para mostrar la información completa del empleado
+     */
+    public void mostrarInformacion() {
+        System.out.println("\n--- Información del Empleado ---");
+        System.out.println("Nombre: " + nombre);
+        System.out.println("Salario: $" + String.format("%.2f", salario));
+    }
+
+    /**
+     * Método para calcular el bono anual (10% del salario)
+     * @return El bono anual
+     */
+    public double calcularBonoAnual() {
+        return salario * 0.10;
+    }
+
+    /**
+     * Método para aumentar el salario por porcentaje
+     * @param porcentaje El porcentaje de aumento
+     */
+    public void aumentarSalario(double porcentaje) {
+        if (porcentaje > 0) {
+            double aumento = salario * (porcentaje / 100);
+            double nuevoSalario = salario + aumento;
+            setSalario(nuevoSalario);
+        } else {
+            System.out.println("❌ Error: El porcentaje debe ser mayor a 0.");
+        }
+    }
+}
+```
+
+## Usage Example — `PruebaEjercicio1.java`
+
+The test class walks through every access pattern: direct field reads, getter/setter calls, invalid inputs, bonus calculation, and a percentage raise.
+
+```java
+// Creating employees — salary validation fires inside the constructor
+Empleado emp1 = new Empleado("Juan García", 2500.0);
+Empleado emp2 = new Empleado("María López", 3000.0);
+
+// Public field: read and write directly
+System.out.println(emp1.nombre);          // Juan García
+emp1.nombre = "Juan Carlos García";       // direct assignment — no method needed
+
+// Private field: must use getter
+double salario = emp1.getSalario();       // ✅ 2500.0
+
+// Setter with validation
+emp1.setSalario(3500.0);   // ✅ Salary updated
+emp1.setSalario(-1000.0);  // ❌ Rejected — must be > 0
+emp1.setSalario(0);        // ❌ Rejected — must be > 0
+emp1.setSalario(2800.0);   // ✅ Salary updated
+
+// Bonus calculation (10 % of current salary)
+double bono = emp1.calcularBonoAnual();   // 280.0
+System.out.println("Bono anual de emp1: $" + String.format("%.2f", bono));
+
+// Percentage raise — delegates validation back to setSalario()
+System.out.println("Salario actual de emp2: $" + String.format("%.2f", emp2.getSalario()));
+emp2.aumentarSalario(5);  // ✅ 3000.0 → 3150.0
+System.out.println("Nuevo salario de emp2: $" + String.format("%.2f", emp2.getSalario()));
+```
+
+<Note>
+The `nombre` field is `public` and can be read or written directly. The `salario` field is `private` — you must use `getSalario()` and `setSalario()` to interact with it.
+</Note>
+
+## Compile & Run
+
+```bash
+javac Taller7/ejercicio_1/Empleado.java Taller7/ejercicio_1/PruebaEjercicio1.java
+java Taller7.ejercicio_1.PruebaEjercicio1
+```

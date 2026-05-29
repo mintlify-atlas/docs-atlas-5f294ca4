@@ -1,0 +1,61 @@
+---
+title: "Unidad 2 Java: Object-Oriented Programming Workshop Series"
+sidebarTitle: "Introduction"
+description: "An overview of the Unidad 2 Java repository — six progressive workshops that teach Java OOP through annotated, runnable source code examples."
+---
+
+Unidad 2 Java is a hands-on learning repository organized into six progressive **Talleres** (workshops 7–12). Each taller focuses on a single core Object-Oriented Programming concept, teaching it through heavily annotated, fully runnable Java source files. Correct patterns are marked with ✅ and deliberate error examples with ❌, so you can see both what works and why some approaches fail — without ever leaving your editor.
+
+## What You Will Learn
+
+<CardGroup cols={2}>
+  <Card title="Access Modifiers" icon="lock" href="/taller7/overview">
+    **Taller 7** — Understand `public`, `private`, and `protected` visibility. Build encapsulated classes with validated getters and setters.
+  </Card>
+  <Card title="Inheritance" icon="code-branch" href="/taller8/overview">
+    **Taller 8** — Use the `extends` keyword to create class hierarchies. Explore parent–child relationships and inheritance pitfalls.
+  </Card>
+  <Card title="The super Keyword" icon="arrow-up" href="/taller9/overview">
+    **Taller 9** — Call parent constructors and overridden methods explicitly with `super`. Understand when and why it is required.
+  </Card>
+  <Card title="Polymorphism" icon="shapes" href="/taller10/overview">
+    **Taller 10** — Override methods with `@Override`, store subclass instances in parent-type variables, and dispatch behavior at runtime.
+  </Card>
+  <Card title="Abstract Classes" icon="circle-dashed" href="/taller11/overview">
+    **Taller 11** — Declare `abstract` classes and methods to enforce contracts across a class hierarchy while sharing common implementation.
+  </Card>
+  <Card title="Interfaces" icon="plug" href="/taller12/overview">
+    **Taller 12** — Define and implement interfaces to achieve flexible, multiple-capability designs decoupled from the class hierarchy.
+  </Card>
+</CardGroup>
+
+## Repository Structure
+
+```
+unidad2_java/
+├── Taller7/      # Access modifiers & encapsulation
+│   ├── ejercicio_1/   # Empleado class
+│   ├── ejercicio_2/   # CuentaBancaria class
+│   └── ejercicio_3/   # Utilidades static methods
+├── taller8/      # Inheritance with extends
+│   ├── ejercicio1/   # Vehiculo → Coche
+│   ├── ejercicio2/   # Persona → Estudiante
+│   ├── ejercicio3/   # Empleado → Gerente
+│   └── ejercicio4/   # Multiple inheritance pitfalls
+├── Taller9/      # super keyword usage
+├── Taller10/     # Polymorphism & @Override
+├── Taller11/     # Abstract classes
+└── Taller12/     # Interfaces
+```
+
+Each subdirectory contains the domain class(es) for the exercise alongside a `Prueba` / `Main` driver class that wires everything together and prints annotated output to the console.
+
+## Prerequisites
+
+- **Java 11 or higher** — the exercises rely on standard Java SE APIs available since Java 11.
+- **A text editor or IDE** — VS Code, IntelliJ IDEA, Eclipse, or any editor of your choice.
+- **Basic Java syntax familiarity** — variables, methods, and classes. No prior OOP knowledge is assumed beyond that.
+
+<Note>
+  Each taller includes a Main class you can compile and run directly. Incorrect examples (❌) are intentionally included to demonstrate compile errors — do not try to compile those files.
+</Note>

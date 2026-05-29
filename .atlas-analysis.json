@@ -1,23 +1,11 @@
 {
-  "$schema": "https://mintlify.com/docs.json",
-  "name": "Unidad 2 Java — OOP Fundamentals",
+  "projectType": "general",
+  "projectName": "Unidad 2 Java — OOP Fundamentals",
+  "projectDescription": "A Java learning repository covering Unit 2 OOP concepts: access modifiers, inheritance, polymorphism, abstract classes, and interfaces through hands-on workshop exercises.",
   "theme": "palm",
-  "colors": {
-    "primary": "#2563EB",
-    "light": "#DBEAFE",
-    "dark": "#1E3A8A"
-  },
-  "navbar": {
-    "primary": {
-      "type": "github",
-      "href": "https://github.com/Jhaymayleth/unidad2_java"
-    }
-  },
-  "footer": {
-    "socials": {
-      "github": "https://github.com/Jhaymayleth/unidad2_java"
-    }
-  },
+  "primaryColor": "#2563EB",
+  "lightColor": "#DBEAFE",
+  "darkColor": "#1E3A8A",
   "navigation": {
     "tabs": [
       {
@@ -101,5 +89,24 @@
         ]
       }
     ]
-  }
+  },
+  "keyFeatures": [
+    "Access modifiers: public, private, protected — practical encapsulation patterns",
+    "Single inheritance with extends, constructor chaining via super()",
+    "Method overriding with @Override and runtime polymorphism",
+    "Abstract classes with abstract methods enforcing contracts",
+    "Interfaces and multiple interface implementation",
+    "Common pitfalls: multiple class inheritance errors, private access in subclasses, overloading vs overriding"
+  ],
+  "publicApiSurface": [
+    "Empleado(nombre, salario) — T7: getSalario(), setSalario(), calcularBonoAnual(), aumentarSalario()",
+    "CuentaBancaria(numeroCuenta, saldoInicial, tipoCuenta) — depositar(), retirar(), transferir()",
+    "Utilidades — suma(), resta(), multiplicar(), dividir(), potencia(), raizCuadrada(), factorial(), esPrimo()",
+    "Vehiculo(marca, velocidadMaxima) — mostrarInfo(), getMarca() / Coche extends Vehiculo",
+    "Persona(nombre, edad) — mostrarDetalles(), saludar() / Estudiante, Profesor extends PersonaT10",
+    "Empleado(nombre, salario) — T8: calcularBono() / Gerente extends Empleado: supervisar(), calcularBono()",
+    "FiguraT11 (abstract) — calcularArea() / CirculoT11, RectanguloT11 extends FiguraT11",
+    "interface Volador — volar() / interface Nadador — nadar() / interface Cantante — cantar()",
+    "Ave implements Volador, Cantante / Pez implements Nadador, Respirador"
+  ]
 }

@@ -1,0 +1,202 @@
+---
+title: "Inheritance in Java: Extending Classes with extends"
+sidebarTitle: "Inheritance"
+description: "How Java single inheritance works: the extends keyword, constructor chaining with super(), and how subclasses reuse and extend parent class behavior."
+---
+
+Inheritance lets you build a new class on top of an existing one, automatically gaining all of its fields and methods without rewriting a single line. The new class — the **subclass** or child — can then add its own fields, override existing behavior, and be used anywhere the parent type is expected. Done thoughtfully, inheritance eliminates duplication and creates a clear, readable type hierarchy that mirrors the domain you are modeling.
+
+## How Inheritance Works
+
+In Java, a class declares its parent with the `extends` keyword:
+
+```java
+public class Coche extends Vehiculo {
+    // Coche inherits everything from Vehiculo
+}
+```
+
+From the moment `extends` appears, `Coche` automatically has every non-private field and method that `Vehiculo` declares. The subclass can then:
+
+- **Use** inherited members as if they were its own.
+- **Override** inherited methods to change their behavior.
+- **Add** brand-new members that only the subclass has.
+
+---
+
+## Constructor Chaining with `super()`
+
+When you create a subclass object, Java requires the parent's constructor to run first. You trigger it by calling `super(...)` as the **very first statement** in the subclass constructor:
+
+```java
+public Coche(String marca, double velocidadMaxima, int numeroDePuertas) {
+    super(marca, velocidadMaxima); // must be first — calls Vehiculo's constructor
+    this.numeroDePuertas = numeroDePuertas;
+}
+```
+
+If you omit the `super()` call and the parent has no no-argument constructor, the compiler reports an error. This chain guarantees that the parent's initialization logic always runs before the child's.
+
+---
+
+## `protected` Fields in a Hierarchy
+
+Fields that should be visible to subclasses but not to outside code are declared `protected`. In `Vehiculo`, both `marca` and `velocidadMaxima` are `protected` so that `Coche` can reference them without a getter:
+
+```java
+public class Vehiculo {
+
+    // protected: accessible in Coche and other subclasses
+    protected String marca;
+    protected double velocidadMaxima;
+
+    public Vehiculo(String marca, double velocidadMaxima) {
+        this.marca = marca;
+        this.velocidadMaxima = velocidadMaxima;
+    }
+
+    public void mostrarInfo() {
+        System.out.println("--- Información del Vehículo ---");
+        System.out.println("Marca: " + marca);
+        System.out.println("Velocidad Máxima: " + velocidadMaxima + " km/h");
+    }
+
+    public String getMarca() { return marca; }
+    public double getVelocidadMaxima() { return velocidadMaxima; }
+}
+```
+
+---
+
+## `Vehiculo` → `Coche` (Taller 8, Ejercicio 1)
+
+`Coche` extends `Vehiculo`, adds its own `numeroDePuertas` field, and overrides `mostrarInfo()` to include that extra detail — while still calling the parent version via `super.mostrarInfo()`:
+
+```java
+public class Coche extends Vehiculo {
+
+    private int numeroDePuertas;
+
+    public Coche(String marca, double velocidadMaxima, int numeroDePuertas) {
+        super(marca, velocidadMaxima);          // initialize parent fields
+        this.numeroDePuertas = numeroDePuertas;
+    }
+
+    @Override
+    public void mostrarInfo() {
+        super.mostrarInfo();                    // print marca + velocidadMaxima
+        System.out.println("Número de Puertas: " + numeroDePuertas);
+    }
+
+    public void mostrarInfoCoche() {
+        System.out.println("\n--- Información Completa del Coche ---");
+        System.out.println("Marca: " + marca);
+        System.out.println("Velocidad Máxima: " + velocidadMaxima + " km/h");
+        System.out.println("Número de Puertas: " + numeroDePuertas);
+    }
+
+    public void acelerar() {
+        System.out.println("El coche " + marca + " está acelerando...");
+    }
+
+    public int getNumeroDePuertas() { return numeroDePuertas; }
+}
+```
+
+At runtime, this hierarchy produces polymorphic behaviour — a `Vehiculo` reference holding a `Coche` object will call `Coche`'s overridden `mostrarInfo()`:
+
+```java
+Vehiculo v = new Coche("Mercedes", 250.0, 5);
+v.mostrarInfo();
+// Output:
+// --- Información del Vehículo ---
+// Marca: Mercedes
+// Velocidad Máxima: 250.0 km/h
+// Número de Puertas: 5
+```
+
+---
+
+## `Empleado` → `Gerente` (Taller 8, Ejercicio 3)
+
+The same pattern scales to business objects. `Gerente` extends `Empleado` and overrides both `mostrarDetalles()` and `calcularBono()` — the manager gets a 15% base bonus (versus the employee's 10%) plus an extra 2% per direct report:
+
+```java
+public class Empleado {
+
+    protected String nombre;
+    protected double salario;
+
+    public Empleado(String nombre, double salario) {
+        this.nombre = nombre;
+        this.salario = salario;
+    }
+
+    public void mostrarDetalles() {
+        System.out.println("--- Detalles del Empleado ---");
+        System.out.println("Nombre: " + nombre);
+        System.out.println("Salario: $" + String.format("%.2f", salario));
+    }
+
+    public double calcularBono() {
+        return salario * 0.10;
+    }
+
+    public void trabajar() {
+        System.out.println(nombre + " está trabajando...");
+    }
+}
+```
+
+```java
+public class Gerente extends Empleado {
+
+    private String departamento;
+    private int empleadosAsuCargo;
+
+    public Gerente(String nombre, double salario, String departamento, int empleadosAsuCargo) {
+        super(nombre, salario);
+        this.departamento = departamento;
+        this.empleadosAsuCargo = empleadosAsuCargo;
+    }
+
+    @Override
+    public void mostrarDetalles() {
+        System.out.println("--- Detalles del Gerente ---");
+        System.out.println("Nombre: " + nombre);
+        System.out.println("Salario: $" + String.format("%.2f", salario));
+        System.out.println("Departamento: " + departamento);
+        System.out.println("Empleados a su cargo: " + empleadosAsuCargo);
+    }
+
+    @Override
+    public double calcularBono() {
+        double bonoBase      = salario * 0.15;
+        double bonoEmpleados = salario * 0.02 * empleadosAsuCargo;
+        return bonoBase + bonoEmpleados;
+    }
+
+    public void supervisar() {
+        System.out.println(nombre + " está supervisando al equipo del departamento " + departamento);
+    }
+
+    public void aprobarPresupuesto(double monto) {
+        System.out.println(nombre + " aprobó un presupuesto de $"
+                + String.format("%.2f", monto) + " para el departamento " + departamento);
+    }
+}
+```
+
+Both classes can be stored in an `Empleado[]` array, and each one's own version of `calcularBono()` will be called — that is polymorphism built directly on top of inheritance.
+
+---
+
+## Single Inheritance Only
+
+Java classes can extend **exactly one** parent. This avoids the ambiguity problems that arise when a class could inherit conflicting implementations from two parents (the "diamond problem").
+
+<Warning>
+Java does not support multiple class inheritance. A class can only extend one parent class. Use interfaces for multiple type contracts.
+</Warning>
+
+If you need a class to fulfill multiple roles, declare those roles as **interfaces** and `implement` as many as necessary — there is no limit on the number of interfaces a class can implement.

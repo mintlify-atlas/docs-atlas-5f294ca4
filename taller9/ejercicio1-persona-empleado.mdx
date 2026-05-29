@@ -1,0 +1,120 @@
+---
+title: "Ejercicio 1: Persona and Empleado — super() Constructor Chaining"
+sidebarTitle: "Persona & Empleado"
+description: "Chain constructors between Persona and Empleado using super(), and call the parent's mostrarDetalles() from the subclass using super.mostrarDetalles()."
+---
+
+Ejercicio 1 introduces the two most common uses of `super` in a single, tightly scoped example. `Persona` is the parent class that holds a person's name and age. `Empleado` extends it to add an employment department. Rather than re-initialising `nombre` and `edad` itself, `Empleado` passes those values straight up to `Persona`'s constructor via `super(nombre, edad)`. When printing details, `Empleado` also delegates to `Persona`'s `mostrarDetalles()` before printing its own extra line, so the output is built cooperatively across both classes.
+
+---
+
+## The `Persona` Class
+
+`Persona` is a plain base class with two package-visible fields and a single method that prints them.
+
+```java title="Taller9/Persona.java"
+package Taller9;
+
+public class Persona {
+    String nombre;
+    int edad;
+
+    public Persona(String nombre, int edad) {
+        this.nombre = nombre;
+        this.edad = edad;
+    }
+
+    public void mostrarDetalles() {
+        System.out.println("Nombre: " + nombre);
+        System.out.println("Edad: " + edad);
+    }
+}
+```
+
+<Note>
+  `nombre` and `edad` use package-level (default) visibility, meaning they are accessible to any class in the same `Taller9` package — including `Empleado`.
+</Note>
+
+---
+
+## The `Empleado` Class
+
+`Empleado` extends `Persona` and adds the `departamento` field. The constructor calls `super(nombre, edad)` as its first statement, handing off the job of initialising the inherited fields to `Persona`. The overridden `mostrarDetalles()` method calls `super.mostrarDetalles()` first, then appends the department line.
+
+```java title="Taller9/Empleado.java"
+package Taller9;
+
+public class Empleado extends Persona {
+    String departamento;
+
+    public Empleado(String nombre, int edad, String departamento) {
+        super(nombre, edad); // Llama al constructor de la clase base Persona
+        this.departamento = departamento;
+    }
+
+    @Override
+    public void mostrarDetalles() {
+        super.mostrarDetalles(); // Llama al método mostrarDetalles de la clase base Persona
+        System.out.println("Departamento: " + departamento);
+    }
+}
+```
+
+---
+
+## How `super.mostrarDetalles()` Works
+
+When `empleado1.mostrarDetalles()` is called, execution flows like this:
+
+```
+Empleado.mostrarDetalles()
+  └─► super.mostrarDetalles()   ← runs Persona.mostrarDetalles()
+        prints "Nombre: Juan"
+        prints "Edad: 30"
+  └─► prints "Departamento: Ventas"
+```
+
+Without the `super.mostrarDetalles()` call, `Empleado` would have to duplicate `Persona`'s print logic. Using `super` keeps the code DRY and guarantees that any future change to `Persona.mostrarDetalles()` is automatically reflected in `Empleado`.
+
+---
+
+## Main Program
+
+```java title="Taller9/MainEjercicio1.java"
+package Taller9;
+
+public class MainEjercicio1 {
+    public static void main(String[] args) {
+        Empleado empleado1 = new Empleado("Juan", 30, "Ventas");
+        System.out.println("Detalles del Empleado:");
+        empleado1.mostrarDetalles();
+
+        System.out.println("\nDetalles de la Persona (a través de Empleado):");
+        Persona persona1 = new Persona("Maria", 25);
+        persona1.mostrarDetalles();
+    }
+}
+```
+
+### Expected output
+
+```
+Detalles del Empleado:
+Nombre: Juan
+Edad: 30
+Departamento: Ventas
+
+Detalles de la Persona (a través de Empleado):
+Nombre: Maria
+Edad: 25
+```
+
+---
+
+## Compile & Run
+
+```bash
+# From the project root (parent of the Taller9/ directory)
+javac Taller9/Persona.java Taller9/Empleado.java Taller9/MainEjercicio1.java
+java Taller9.MainEjercicio1
+```

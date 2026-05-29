@@ -1,0 +1,113 @@
+---
+title: "Ejercicio 1: Ave Implementing Volador and Cantante Interfaces"
+sidebarTitle: "Ave & Interfaces"
+description: "Model an Ave class that implements both the Volador and Cantante interfaces, demonstrating multiple interface implementation in Java."
+---
+
+Ejercicio 1 lays the foundation of Taller 12 by defining two single-method interfaces — `Volador` and `Cantante` — and then building an `Ave` class that satisfies both contracts simultaneously. The exercise shows that a class is not limited to one role: a bird in the real world both flies and sings, and Java's multiple interface implementation lets the code reflect that reality directly.
+
+## The Interfaces
+
+Each interface declares exactly one method. There is no implementation, no state — just a named capability that any willing class can adopt.
+
+**`Volador.java`** — anything that can fly:
+
+```java
+package Taller12;
+
+public interface Volador {
+    void volar();
+}
+```
+
+**`Cantante.java`** — anything that can sing:
+
+```java
+package Taller12;
+
+public interface Cantante {
+    void cantar();
+}
+```
+
+## The `Ave` Class
+
+`Ave` declares `implements Volador, Cantante`, meaning it must provide a concrete body for both `volar()` and `cantar()`. It also carries two private fields — `nombre` and `especie` — that are set through its constructor and referenced in the method output strings.
+
+```java
+package Taller12;
+
+public class Ave implements Volador, Cantante {
+    private String nombre;
+    private String especie;
+
+    public Ave(String nombre, String especie) {
+        this.nombre = nombre;
+        this.especie = especie;
+    }
+
+    @Override
+    public void volar() {
+        System.out.println("El ave " + nombre + " (" + especie + ") está volando.");
+    }
+
+    @Override
+    public void cantar() {
+        System.out.println("El ave " + nombre + " está cantando: ¡Pío pío!");
+    }
+}
+```
+
+Both overrides use the fields to produce descriptive output — the bird's name appears in every message, and the species is included in the flying message.
+
+## Usage — `Ejercicio1.java`
+
+The main class constructs a single `Ave` and calls both interface methods on it:
+
+```java
+package Taller12;
+
+public class Ejercicio1 {
+    public static void main(String[] args) {
+        Ave ave = new Ave("Tweety", "Canario");
+        ave.volar();
+        ave.cantar();
+    }
+}
+```
+
+**Expected output:**
+
+```
+El ave Tweety (Canario) está volando.
+El ave Tweety está cantando: ¡Pío pío!
+```
+
+## Polymorphism Through Interfaces
+
+Because `Ave` implements both `Volador` and `Cantante`, an `Ave` object IS-A `Volador` and IS-A `Cantante` at the same time. Either interface type can be used as the declared variable type, and the JVM will dispatch to `Ave`'s implementation at runtime:
+
+```java
+// Ave referenced as Volador — only volar() is visible through this type
+Volador v = new Ave("Tweety", "Canario");
+v.volar(); // calls Ave's volar() implementation
+
+// Ave referenced as Cantante — only cantar() is visible through this type
+Cantante c = new Ave("Tweety", "Canario");
+c.cantar(); // calls Ave's cantar() implementation
+```
+
+This is the same polymorphic substitution principle seen with abstract classes, applied to interfaces. A method that accepts a `Volador` parameter will work correctly whether you pass an `Ave` or any other future class that also implements `Volador`.
+
+## Compile & Run
+
+```bash
+# From the project root (parent of the Taller12/ folder)
+javac Taller12/Volador.java Taller12/Cantante.java Taller12/Ave.java Taller12/Ejercicio1.java
+
+# Or compile all files in the package at once
+javac Taller12/*.java
+
+# Run
+java Taller12.Ejercicio1
+```

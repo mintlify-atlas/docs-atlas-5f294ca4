@@ -1,0 +1,82 @@
+---
+title: "Taller 12: Interfaces and Multiple Interface Implementation"
+sidebarTitle: "Overview"
+description: "Overview of Taller 12 — three exercises on Java interfaces: defining behavior contracts, implementing multiple interfaces, and modeling real-world roles."
+---
+
+Taller 12 introduces interfaces — the Java mechanism for defining pure behavior contracts that any class can fulfill, regardless of its class hierarchy. Unlike abstract classes, interfaces carry no instance state and no implementation (in standard Java 8+ form); they only declare method signatures. Crucially, a single class can implement as many interfaces as needed, letting you mix unrelated capabilities onto one object in a way that single-inheritance class trees never allow.
+
+## Exercises
+
+<CardGroup cols={3}>
+  <Card title="Ejercicio 1: Ave & Interfaces" icon="bird" href="/taller12/ejercicio1-ave-volador-cantante">
+    Define `Volador` and `Cantante` interfaces, then build an `Ave` class that satisfies both contracts at once.
+  </Card>
+  <Card title="Ejercicio 2: Pez & Nadador" icon="fish" href="/taller12/ejercicio2-pez-nadador">
+    Define `Nadador` and `Respirador` interfaces, then implement both on a `Pez` class to model aquatic behavior.
+  </Card>
+  <Card title="Ejercicio 3: Pajaro & Piedra" icon="cube" href="/taller12/ejercicio3-piedra-pajaro">
+    Explore selective interface adoption — `Pajaro` takes `Cantante`, `Piedra` takes `Volador`, each in the `Ejercicio3` sub-package.
+  </Card>
+</CardGroup>
+
+## Key Concepts
+
+| Concept | Summary |
+|---|---|
+| `interface` | Declares a set of method signatures with no implementation. All methods are implicitly `public abstract`. |
+| `implements` | Keyword used by a class to commit to fulfilling one or more interfaces. |
+| Multiple interface implementation | A class can list several interfaces separated by commas: `implements A, B, C`. |
+| Interface vs abstract class | An abstract class can carry state and partial implementation; an interface is a pure contract. A class can extend only one class but implement many interfaces. |
+
+## Interface Syntax Reference
+
+Declaring an interface requires only the method signature — no body, no access modifier needed on the method (it is implicitly `public abstract`):
+
+```java
+// Taller12/Volador.java
+package Taller12;
+
+public interface Volador {
+    void volar(); // implicitly public abstract
+}
+
+// Taller12/Cantante.java
+package Taller12;
+
+public interface Cantante {
+    void cantar(); // implicitly public abstract
+}
+```
+
+A class implements multiple interfaces by listing them after `implements`, separated by commas. It must provide a concrete `@Override` for every method declared in each interface:
+
+```java
+// Taller12/Ave.java
+package Taller12;
+
+public class Ave implements Volador, Cantante {
+    @Override
+    public void volar() { /* ... */ }
+
+    @Override
+    public void cantar() { /* ... */ }
+}
+```
+
+## Compile Commands
+
+All top-level Taller 12 classes belong to the `Taller12` package. Compile from the project root (the directory that contains the `Taller12/` folder):
+
+```bash
+# Compile every file in the package at once
+javac Taller12/*.java
+
+# Compile the Ejercicio3 sub-package
+javac Taller12/Ejercicio3/*.java
+
+# Run a specific exercise
+java Taller12.Ejercicio1
+java Taller12.Ejercicio2
+java Taller12.Ejercicio3.Main3
+```

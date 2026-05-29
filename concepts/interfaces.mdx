@@ -1,0 +1,195 @@
+---
+title: "Java Interfaces: Defining Behavior Contracts Across Types"
+sidebarTitle: "Interfaces"
+description: "How Java interfaces define behavior contracts independent of class hierarchy, and how a single class can implement multiple interfaces."
+---
+
+An interface is Java's way of saying "any class that claims to be this thing must be able to do the following." Unlike inheritance, which models an "is-a" relationship along a single parent chain, interfaces model **capabilities** — roles that completely unrelated classes can share. A bird and an airplane have nothing in common as types, but both can fly; an interface captures that shared ability cleanly, without forcing an awkward class hierarchy. Because a class can implement any number of interfaces, interfaces are also the mechanism Java uses to compensate for the absence of multiple inheritance.
+
+## What an Interface Is
+
+An interface is a pure contract: a named list of method signatures. It has no constructor, no instance fields, and (before Java 8) no method bodies. Every method declared in an interface is implicitly `public abstract` — you don't have to write those keywords, but they're always there.
+
+```java
+public interface Volador {
+    void volar(); // implicitly public abstract
+}
+```
+
+A class **implements** an interface by using the `implements` keyword and providing a concrete body for every method the interface declares. If even one method is missing, the compiler refuses to compile the class.
+
+---
+
+## The Taller 12 Interfaces
+
+Taller 12 defines three small, focused interfaces — each capturing a single behavior:
+
+```java
+// Taller12/Volador.java
+public interface Volador {
+    void volar();
+}
+```
+
+```java
+// Taller12/Nadador.java
+public interface Nadador {
+    void nadar();
+}
+```
+
+```java
+// Taller12/Cantante.java
+public interface Cantante {
+    void cantar();
+}
+```
+
+Each interface is intentionally narrow. A class that needs to fly implements `Volador`. A class that needs to swim implements `Nadador`. These roles compose freely.
+
+---
+
+## Multiple Interface Implementation: `Ave`
+
+`Ave` (bird) can both fly and sing — two capabilities that have nothing to do with each other structurally. Java lets a single class implement both interfaces by listing them comma-separated after `implements`:
+
+```java
+// Taller12/Ave.java
+public class Ave implements Volador, Cantante {
+    private String nombre;
+    private String especie;
+
+    public Ave(String nombre, String especie) {
+        this.nombre = nombre;
+        this.especie = especie;
+    }
+
+    @Override
+    public void volar() {
+        System.out.println("El ave " + nombre + " (" + especie + ") está volando.");
+    }
+
+    @Override
+    public void cantar() {
+        System.out.println("El ave " + nombre + " está cantando: ¡Pío pío!");
+    }
+}
+```
+
+The compiler verifies that `Ave` provides both `volar()` (from `Volador`) and `cantar()` (from `Cantante`). If either method were missing, compilation would fail.
+
+---
+
+## `Pez` — A Different Class, Different Interfaces
+
+`Pez` (fish) swims and breathes through gills — completely different capabilities from `Ave`, but expressed through the same pattern:
+
+```java
+// Taller12/Pez.java
+public class Pez implements Nadador, Respirador {
+    private String nombre;
+    private String tipo;
+
+    public Pez(String nombre, String tipo) {
+        this.nombre = nombre;
+        this.tipo = tipo;
+    }
+
+    @Override
+    public void nadar() {
+        System.out.println("El pez " + nombre + " (" + tipo + ") está nadando en el agua.");
+    }
+
+    @Override
+    public void respirar() {
+        System.out.println("El pez " + nombre + " está respirando a través de sus branquias.");
+    }
+}
+```
+
+`Ave` and `Pez` share no common ancestor class, yet both can be used through their interface types:
+
+```java
+Volador v = new Ave("Pájaro", "Canario");
+Nadador n = new Pez("Nemo", "Pez Payaso");
+
+v.volar();  // El ave Pájaro (Canario) está volando.
+n.nadar();  // El pez Nemo (Pez Payaso) está nadando en el agua.
+```
+
+---
+
+## Interface vs. Abstract Class
+
+<Tabs>
+  <Tab title="Interface">
+    ```java
+    public interface Volador {
+        // No constructor
+        // No instance fields
+        // All methods are public abstract by default
+
+        void volar();    // contract — no body
+        void aterrizar(); // another contract
+    }
+
+    // A class can implement MULTIPLE interfaces
+    public class Ave implements Volador, Cantante {
+        @Override
+        public void volar() { /* ... */ }
+
+        @Override
+        public void cantar() { /* ... */ }
+    }
+    ```
+    - No constructors or instance state
+    - Only constants (`public static final` fields)
+    - A class may implement as many interfaces as needed
+    - Best for **capabilities / roles** (Flyable, Swimmable, Printable)
+  </Tab>
+  <Tab title="Abstract Class">
+    ```java
+    abstract class FiguraT11 {
+        // Has a constructor
+        protected String nombre;  // instance field — shared state
+
+        public FiguraT11(String nombre) {
+            this.nombre = nombre;  // initialization logic
+        }
+
+        // Abstract method — subclass must implement
+        public abstract double calcularArea();
+
+        // Concrete method — shared by all subclasses
+        public void mostrarArea() {
+            System.out.println("El área de " + nombre + " es: " + calcularArea());
+        }
+    }
+
+    // A class can extend only ONE abstract class
+    class CirculoT11 extends FiguraT11 {
+        private double radio;
+
+        public CirculoT11(String nombre, double radio) {
+            super(nombre);
+            this.radio = radio;
+        }
+
+        @Override
+        public double calcularArea() {
+            return Math.PI * radio * radio;
+        }
+    }
+    ```
+    - Can have constructors and instance fields
+    - Can mix abstract and concrete methods
+    - A class can extend only **one** abstract class
+    - Best for a **base type** with shared state (Animal, Figura, Empleado)
+  </Tab>
+</Tabs>
+
+---
+
+<Tip>
+Use **interfaces** to define roles and capabilities (`Volador`, `Nadador`, `Cantante`) that can be mixed and matched freely across unrelated classes. Use **abstract classes** to define a shared base type (`FiguraT11`, `Empleado`) where subclasses genuinely share state or common initialization logic. When in doubt, prefer interfaces — they keep your design flexible and composable.
+</Tip>

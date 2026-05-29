@@ -1,0 +1,138 @@
+---
+title: "Ejercicio 3: super Pitfalls — Private Access and Static Context"
+sidebarTitle: "super Pitfalls"
+description: "Discover two common super misuse errors: accessing private fields from a subclass and using super in a static method context."
+---
+
+This exercise deliberately demonstrates two scenarios where `super` fails — understanding these errors prevents confusion when the compiler rejects seemingly reasonable code. Rather than showing only working programs, Ejercicio 3 keeps the broken lines commented in the source so you can see exactly what you must *not* write, alongside the correct alternative in each case. Both errors stem from the same root cause: `super` is a reference tied to a specific object instance, so anything that removes that instance context — a `static` method, or a `private` access barrier — makes `super` unusable.
+
+---
+
+## Pitfall 1: `super` in a Static Context
+
+Inside `MainEjercicio3.main()`, the following line is commented out:
+
+```java
+// super.toString(); // Error de compilación: 'super' cannot be used in a static context
+```
+
+`main` is declared `static`, meaning it belongs to the class itself rather than to any particular object. There is no `this` reference, and therefore no parent portion of an object to refer to. The compiler produces:
+
+```
+error: non-static variable super cannot be referenced from a static context
+```
+
+The runtime equivalent would also be nonsensical: there is no object in scope whose parent class fields could be read. The working code in `main` instead prints an explanatory message and then delegates to an instance method where `super` *is* valid:
+
+```java
+public static void main(String[] args) {
+    // super.toString(); // Error de compilación: 'super' cannot be used in a static context
+    System.out.println("Demostración de uso incorrecto de 'super' en un contexto no derivado (como main): No compila.");
+    System.out.println("El error sería: 'super' cannot be used in a static context");
+
+    ClaseDerivada objDerivado = new ClaseDerivada();
+    objDerivado.intentarAccederAtributoPrivado();
+}
+```
+
+<Warning>
+  Even inside a subclass, if the method is `static`, `super` is forbidden. This rule applies universally — not just in `main`.
+</Warning>
+
+---
+
+## Pitfall 2: Accessing Private Fields via `super`
+
+`ClaseBase` declares two fields with different access modifiers:
+
+| Field | Modifier | Subclass can read via `super`? |
+|---|---|---|
+| `atributoPrivado` | `private` | ❌ No |
+| `atributoProtegido` | `protected` | ✅ Yes |
+
+Inside `ClaseDerivada.intentarAccederAtributoPrivado()`, this line is commented out because it will not compile:
+
+```java
+// super.atributoPrivado; // Esto causaría un error de compilación: atributoPrivado tiene acceso privado
+```
+
+The compiler error would be:
+
+```
+error: atributoPrivado has private access in ClaseBase
+```
+
+`private` means the field is encapsulated *within* `ClaseBase` only — not even its own subclasses can bypass that boundary. The correct approach is to call the public getter `super.getAtributoPrivado()`, which `ClaseBase` exposes precisely for this purpose.
+
+---
+
+## Full Source
+
+```java title="Taller9/MainEjercicio3.java"
+package Taller9;
+
+class ClaseBase {
+    private String atributoPrivado = "Soy privado";
+    protected String atributoProtegido = "Soy protegido";
+
+    public String getAtributoPrivado() {
+        return atributoPrivado;
+    }
+}
+
+class ClaseDerivada extends ClaseBase {
+    public void intentarAccederAtributoPrivado() {
+        // super.atributoPrivado; // Esto causaría un error de compilación: atributoPrivado tiene acceso privado
+        System.out.println("Intentando acceder a atributoPrivado de la clase base (incorrecto): No se puede acceder directamente.");
+        System.out.println("Accediendo a atributoProtegido de la clase base (correcto): " + super.atributoProtegido);
+        System.out.println("Accediendo a atributoPrivado a través de un getter (correcto): " + super.getAtributoPrivado());
+    }
+}
+
+public class MainEjercicio3 {
+    public static void main(String[] args) {
+        // 1. Intentar utilizar super en un contexto que no sea una clase derivada
+        // super.toString(); // Error de compilación: 'super' cannot be used in a static context
+        System.out.println("Demostración de uso incorrecto de 'super' en un contexto no derivado (como main): No compila.");
+        System.out.println("El error sería: 'super' cannot be used in a static context");
+
+        ClaseDerivada objDerivado = new ClaseDerivada();
+        objDerivado.intentarAccederAtributoPrivado();
+    }
+}
+```
+
+### Expected output
+
+```
+Demostración de uso incorrecto de 'super' en un contexto no derivado (como main): No compila.
+El error sería: 'super' cannot be used in a static context
+Intentando acceder a atributoPrivado de la clase base (incorrecto): No se puede acceder directamente.
+Accediendo a atributoProtegido de la clase base (correcto): Soy protegido
+Accediendo a atributoPrivado a través de un getter (correcto): Soy privado
+```
+
+---
+
+## Summary: What `super` Can and Cannot Access
+
+| Member type | Accessible via `super`? | Alternative |
+|---|---|---|
+| `public` field | ✅ Yes | — |
+| `protected` field | ✅ Yes | — |
+| `private` field | ❌ No | Use a `public`/`protected` getter |
+| Any member in a `static` method | ❌ No | N/A — `super` requires an instance context |
+
+---
+
+## Compile & Run
+
+```bash
+# From the project root (parent of the Taller9/ directory)
+javac Taller9/MainEjercicio3.java
+java Taller9.MainEjercicio3
+```
+
+<Note>
+  `ClaseBase` and `ClaseDerivada` are package-private classes defined in the same file as `MainEjercicio3`, so a single `javac` command compiles all three.
+</Note>

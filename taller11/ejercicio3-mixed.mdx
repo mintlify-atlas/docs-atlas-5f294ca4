@@ -1,0 +1,179 @@
+---
+title: "Ejercicio 3: Mixed Abstract Class Scenarios"
+sidebarTitle: "Mixed Scenarios"
+description: "Explore additional abstract class patterns from MainEjercicio3, demonstrating combined use of abstract and concrete methods in the same hierarchy."
+---
+
+Ejercicio 3 shifts focus from the happy path to a more nuanced question: what happens when an abstract class contains a concrete method that *might* need to be overridden, but isn't declared abstract — leaving it up to the subclass to decide whether to customise it? This exercise defines `ClaseAbstractaIncorrecta` with both an abstract method (`metodoAbstracto()`) and a concrete default method (`metodoConcretoQuePodriaSobreescribirse()`), then compares two subclasses: `ImplementacionCorrecta`, which actively overrides the concrete method, and `ImplementacionOlvidadiza`, which silently inherits the default. The contrast highlights a real design pitfall that every Java developer should recognise.
+
+## Class Hierarchy
+
+```
+ClaseAbstractaIncorrecta  (abstract)
+├── ImplementacionCorrecta   — implements abstract method AND overrides concrete method
+└── ImplementacionOlvidadiza — implements abstract method but FORGETS to override concrete method
+```
+
+---
+
+## `ClaseAbstractaIncorrecta` — Abstract Base with a Mixed Contract
+
+The abstract class holds a `mensaje` field, declares one abstract method, and provides one concrete method with a default behaviour. The name "incorrecta" is intentional: if the concrete method's behaviour is genuinely expected to vary per subclass, it **should** be abstract — leaving it concrete is a potential design smell.
+
+```java
+package Taller11;
+
+abstract class ClaseAbstractaIncorrecta {
+    protected String mensaje;
+
+    public ClaseAbstractaIncorrecta(String mensaje) {
+        this.mensaje = mensaje;
+    }
+
+    public abstract void metodoAbstracto();
+
+    // Este es un método concreto en una clase abstracta.
+    // Podría ser una mala práctica si se espera que las subclases siempre lo modifiquen
+    // pero no se declara abstracto.
+    public void metodoConcretoQuePodriaSobreescribirse() {
+        System.out.println("ClaseAbstractaIncorrecta: Este es un método concreto que hace algo por defecto: " + mensaje);
+    }
+}
+```
+
+---
+
+## `ImplementacionCorrecta` — Overrides Both Methods
+
+`ImplementacionCorrecta` fulfils the abstract contract and also deliberately overrides the concrete method to provide its own specific behaviour. This is the recommended approach when a subclass needs to diverge from the base class default.
+
+```java
+class ImplementacionCorrecta extends ClaseAbstractaIncorrecta {
+    public ImplementacionCorrecta(String mensaje) {
+        super(mensaje);
+    }
+
+    @Override
+    public void metodoAbstracto() {
+        System.out.println("ImplementacionCorrecta: Implementación del método abstracto. Mensaje: " + mensaje);
+    }
+
+    // Sobrescribimos el método concreto para darle un comportamiento específico
+    @Override
+    public void metodoConcretoQuePodriaSobreescribirse() {
+        System.out.println("ImplementacionCorrecta: Sobrescribiendo el método concreto. Mensaje: " + mensaje + " (comportamiento específico).");
+    }
+}
+```
+
+---
+
+## `ImplementacionOlvidadiza` — Forgets to Override
+
+`ImplementacionOlvidadiza` implements the mandatory abstract method but never overrides `metodoConcretoQuePodriaSobreescribirse()`. At runtime it silently falls back to the base class default — a situation that compiles and runs without error, but may produce unexpected output if a specific subclass behaviour was intended.
+
+```java
+class ImplementacionOlvidadiza extends ClaseAbstractaIncorrecta {
+    public ImplementacionOlvidadiza(String mensaje) {
+        super(mensaje);
+    }
+
+    @Override
+    public void metodoAbstracto() {
+        System.out.println("ImplementacionOlvidadiza: Implementación del método abstracto. Mensaje: " + mensaje);
+    }
+    // Aquí se "olvida" sobrescribir metodoConcretoQuePodriaSobreescribirse()
+    // y se hereda el comportamiento por defecto de la clase abstracta, lo cual
+    // podría no ser lo deseado.
+}
+```
+
+---
+
+## Full `MainEjercicio3` Demonstration
+
+```java
+package Taller11;
+
+public class MainEjercicio3 {
+    public static void main(String[] args) {
+        System.out.println("\n--- Demostración de Uso Incorrecto de Clases Abstractas (Ejercicio 3) ---");
+
+        // 1. Intentar instanciar una clase abstracta directamente
+        // ClaseAbstractaIncorrecta objAbstracto = new ClaseAbstractaIncorrecta("Mensaje"); // ERROR DE COMPILACIÓN
+        System.out.println("1. Intentar instanciar una clase abstracta directamente: \n" +
+            "   // ClaseAbstractaIncorrecta objAbstracto = new ClaseAbstractaIncorrecta(\"Mensaje\");\n" +
+            "   // Esto generaría un error de compilación: \"ClaseAbstractaIncorrecta is abstract; cannot be instantiated\"");
+
+        System.out.println("\n2. Demostración de método concreto en clase abstracta (posible mala práctica):\n");
+
+        ImplementacionCorrecta correcta = new ImplementacionCorrecta("Implementación Correcta");
+        correcta.metodoAbstracto();
+        correcta.metodoConcretoQuePodriaSobreescribirse();
+
+        System.out.println("\n");
+
+        ImplementacionOlvidadiza olvidadiza = new ImplementacionOlvidadiza("Implementación Olvidadiza");
+        olvidadiza.metodoAbstracto();
+        olvidadiza.metodoConcretoQuePodriaSobreescribirse(); // Usa el método de la clase abstracta
+
+        System.out.println("\nExplicación del punto 2:\n" +
+            "   - ImplementacionCorrecta sobrescribe el método concreto, lo cual es ideal si se necesita un comportamiento específico.\n" +
+            "   - ImplementacionOlvidadiza no sobrescribe el método concreto, por lo que hereda el comportamiento\n" +
+            "     por defecto de la clase abstracta. Esto puede ser un error si se esperaba una implementación\n" +
+            "     específica y se olvidó sobrescribir. Si el método siempre debe ser implementado por las\n" +
+            "     subclases, debería haber sido declarado como abstracto en la clase base.");
+    }
+}
+```
+
+### Expected Output
+
+```
+--- Demostración de Uso Incorrecto de Clases Abstractas (Ejercicio 3) ---
+1. Intentar instanciar una clase abstracta directamente:
+   // ClaseAbstractaIncorrecta objAbstracto = new ClaseAbstractaIncorrecta("Mensaje");
+   // Esto generaría un error de compilación: "ClaseAbstractaIncorrecta is abstract; cannot be instantiated"
+
+2. Demostración de método concreto en clase abstracta (posible mala práctica):
+
+ImplementacionCorrecta: Implementación del método abstracto. Mensaje: Implementación Correcta
+ImplementacionCorrecta: Sobrescribiendo el método concreto. Mensaje: Implementación Correcta (comportamiento específico).
+
+
+ImplementacionOlvidadiza: Implementación del método abstracto. Mensaje: Implementación Olvidadiza
+ClaseAbstractaIncorrecta: Este es un método concreto que hace algo por defecto: Implementación Olvidadiza
+```
+
+Notice that the last line comes from `ClaseAbstractaIncorrecta`, not from `ImplementacionOlvidadiza` — a silent inheritance that can be hard to spot in larger codebases.
+
+---
+
+## Patterns Demonstrated
+
+| Pattern | Class | Behaviour |
+|---|---|---|
+| Cannot instantiate abstract class | `ClaseAbstractaIncorrecta` | Compile error if `new` is attempted directly |
+| Must implement abstract method | both subclasses | `metodoAbstracto()` must be overridden — no choice |
+| Optional override of concrete method | `ImplementacionCorrecta` | Actively overrides the default for specific behaviour |
+| Silent default inheritance | `ImplementacionOlvidadiza` | Falls back to base class behaviour without warning |
+
+<Warning>
+If a concrete method in an abstract class is **always** expected to be customised per subclass, declare it `abstract` instead. Leaving it concrete gives subclasses the *option* to override — but the compiler will never warn if they forget.
+</Warning>
+
+<Tip>
+A useful design heuristic: if you find yourself writing a concrete method in an abstract class and then immediately overriding it in every single subclass, that method should almost certainly be `abstract`.
+</Tip>
+
+---
+
+## Compile & Run
+
+```bash
+# From the project root — all classes are defined in MainEjercicio3.java
+javac Taller11/MainEjercicio3.java
+
+# Run
+java Taller11.MainEjercicio3
+```

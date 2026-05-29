@@ -1,0 +1,153 @@
+---
+title: "Encapsulation in Java: Protecting Data with Getters and Setters"
+sidebarTitle: "Encapsulation"
+description: "Understand encapsulation in Java — how to bundle data with methods and enforce validation using private fields with public getters and setters."
+---
+
+Encapsulation is the OOP principle that says an object should own its data and decide how that data is read or changed. Instead of leaving fields exposed for anyone to modify, you hide them behind a controlled interface of methods. The result is an object that can guarantee its own correctness — because every path into its state passes through code you wrote.
+
+## What Encapsulation Means in Practice
+
+Encapsulation has two complementary parts:
+
+1. **Bundling** — fields (data) and the methods that act on them live together in the same class.
+2. **Hiding** — fields are `private`; the outside world interacts only through `public` methods.
+
+This combination makes the internal representation of a class a private implementation detail. You can change how the data is stored without breaking any code that uses the class, as long as the public method signatures stay the same.
+
+---
+
+## The Getter / Setter Pattern
+
+The canonical Java pattern for encapsulation is:
+
+- Declare the field `private`.
+- Provide a `public` **getter** that returns the value.
+- Provide a `public` **setter** that validates the incoming value before storing it.
+
+```java
+private double salario;          // hidden field
+
+public double getSalario() {     // controlled read
+    return salario;
+}
+
+public void setSalario(double nuevoSalario) {  // controlled write
+    if (nuevoSalario > 0) {
+        this.salario = nuevoSalario;
+    } else {
+        System.out.println("❌ Error: El salario debe ser mayor a 0.");
+    }
+}
+```
+
+The setter is where invariants live. Without it, any caller could write `emp.salario = -500;` and the object would silently hold an invalid value.
+
+---
+
+## The `CuentaBancaria` Example
+
+The bank account class from Taller 7 is a textbook encapsulation example. It stores sensitive financial data in `private` fields and exposes only carefully validated operations:
+
+```java
+public class CuentaBancaria {
+
+    // PRIVATE: sensitive data is hidden
+    private String numeroCuenta;
+    private double saldo;
+    private int transacciones;
+
+    // PUBLIC: non-sensitive metadata
+    public String tipoCuenta;
+
+    public CuentaBancaria(String numeroCuenta, double saldoInicial, String tipoCuenta) {
+        this.numeroCuenta = numeroCuenta;
+        this.saldo = (saldoInicial >= 0) ? saldoInicial : 0;
+        this.tipoCuenta = tipoCuenta;
+        this.transacciones = 0;
+    }
+
+    // Read-only getter — there is no setNumeroCuenta()
+    public String getNumeroCuenta() {
+        return numeroCuenta;
+    }
+
+    public double getSaldo() {
+        return saldo;
+    }
+}
+```
+
+`numeroCuenta` has a getter but **no setter** — the account number is set once at construction and never changes. That design decision is communicated purely through encapsulation.
+
+### `depositar()` and `retirar()`
+
+Rather than allowing direct writes to `saldo`, `CuentaBancaria` exposes transactional methods that validate every operation:
+
+```java
+public void depositar(double cantidad) {
+    if (cantidad > 0) {
+        saldo += cantidad;
+        transacciones++;
+        System.out.println("✅ Depósito realizado: $" + String.format("%.2f", cantidad));
+        System.out.println("   Saldo actual: $" + String.format("%.2f", saldo));
+    } else {
+        System.out.println("❌ Error: La cantidad debe ser mayor a 0.");
+    }
+}
+
+public void retirar(double cantidad) {
+    if (cantidad > 0 && cantidad <= saldo) {
+        saldo -= cantidad;
+        transacciones++;
+        System.out.println("✅ Retiro realizado: $" + String.format("%.2f", cantidad));
+        System.out.println("   Saldo actual: $" + String.format("%.2f", saldo));
+    } else if (cantidad > saldo) {
+        System.out.println("❌ Error: Fondos insuficientes. Saldo: $"
+                + String.format("%.2f", saldo));
+    } else {
+        System.out.println("❌ Error: La cantidad debe ser mayor a 0.");
+    }
+}
+```
+
+Both methods update the `transacciones` counter automatically — something that would be impossible if `saldo` were a public field, because callers would bypass these methods entirely.
+
+### `transferir()` — Composing Encapsulated Operations
+
+The transfer method reuses `retirar()` and `depositar()` rather than manipulating `saldo` directly. This means all validation rules are applied consistently, even inside the class itself:
+
+```java
+public void transferir(CuentaBancaria otraCuenta, double cantidad) {
+    if (cantidad > 0 && cantidad <= saldo) {
+        this.retirar(cantidad);
+        otraCuenta.depositar(cantidad);
+        System.out.println("✅ Transferencia completada de " + this.numeroCuenta
+                + " a " + otraCuenta.numeroCuenta);
+    } else {
+        System.out.println("❌ Error: Transferencia no válida.");
+    }
+}
+```
+
+---
+
+## Benefits of Encapsulation
+
+<CardGroup cols={3}>
+  <Card title="Controlled Mutation" icon="lock">
+    No field can be set to an invalid value — every write path goes through a method that validates first.
+  </Card>
+  <Card title="Invariant Enforcement" icon="shield-check">
+    Constraints like "balance must be ≥ 0" or "account number is immutable" are guaranteed by the class itself.
+  </Card>
+  <Card title="Easier Refactoring" icon="wrench">
+    Rename a field, change its type, or restructure internal storage — callers never see the difference because they only call methods.
+  </Card>
+</CardGroup>
+
+---
+
+<Tip>
+Use `setSalario()` instead of directly assigning `salario` to enforce the "must be &gt; 0" invariant. Even the constructor in `Empleado` delegates to `setSalario()` rather than writing to the field directly — so the check is guaranteed to run regardless of how the object is created.
+</Tip>

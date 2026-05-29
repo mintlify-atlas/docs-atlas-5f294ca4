@@ -1,0 +1,197 @@
+---
+title: "Ejercicio 1: Vehiculo and Coche — Inheritance and Method Extension"
+sidebarTitle: "Vehiculo & Coche"
+description: "Create a Vehiculo base class with protected fields and extend it with Coche, adding numeroDePuertas and overriding mostrarInfo() with super() delegation."
+---
+
+Ejercicio 1 introduces the fundamental mechanics of Java inheritance. A generic `Vehiculo` class captures state common to every vehicle — brand and top speed — using `protected` visibility so subclasses can read those fields directly. `Coche` then extends `Vehiculo`, adds the car-specific `numeroDePuertas` field, and overrides `mostrarInfo()` in a way that reuses the parent's output block rather than duplicating it. This pattern — calling `super.method()` inside an override — is the standard way to extend, not replace, parent behaviour.
+
+## Inheritance hierarchy
+
+```
+Vehiculo
+  └── extends ──> Coche
+```
+
+## Vehiculo — base class
+
+`Vehiculo` declares two `protected` fields so that any subclass in the same package can access them without going through a getter.
+
+```java
+package ejercicio1;
+/**
+ * Clase base que representa un vehículo genérico
+ */
+public class Vehiculo {
+
+    // Atributos protegidos para que sean accesibles desde clases derivadas
+    protected String marca;
+    protected double velocidadMaxima;
+
+    /**
+     * Constructor de la clase Vehiculo
+     * @param marca Marca del vehículo
+     * @param velocidadMaxima Velocidad máxima del vehículo en km/h
+     */
+    public Vehiculo(String marca, double velocidadMaxima) {
+        this.marca = marca;
+        this.velocidadMaxima = velocidadMaxima;
+    }
+
+    /**
+     * Método para mostrar información del vehículo
+     */
+    public void mostrarInfo() {
+        System.out.println("--- Información del Vehículo ---");
+        System.out.println("Marca: " + marca);
+        System.out.println("Velocidad Máxima: " + velocidadMaxima + " km/h");
+    }
+
+    // Getters
+    public String getMarca() {
+        return marca;
+    }
+
+    public double getVelocidadMaxima() {
+        return velocidadMaxima;
+    }
+}
+```
+
+### Members at a glance
+
+| Member | Visibility | Description |
+|---|---|---|
+| `marca` | `protected` | Brand name of the vehicle |
+| `velocidadMaxima` | `protected` | Top speed in km/h |
+| `Vehiculo(marca, velocidadMaxima)` | `public` | Parameterised constructor |
+| `mostrarInfo()` | `public` | Prints brand and top speed |
+| `getMarca()` | `public` | Getter for `marca` |
+| `getVelocidadMaxima()` | `public` | Getter for `velocidadMaxima` |
+
+## Coche — derived class
+
+`Coche` chains the parent constructor with `super(marca, velocidadMaxima)` as its very first statement, then initialises its own `numeroDePuertas` field. Its `mostrarInfo()` override calls `super.mostrarInfo()` first — printing the two parent lines — before appending the door count.
+
+```java
+package ejercicio1;
+/**
+ * Clase que hereda de Vehiculo y representa un coche específico
+ */
+public class Coche extends Vehiculo {
+
+    // Atributo nuevo específico del coche
+    private int numeroDePuertas;
+
+    /**
+     * Constructor de la clase Coche
+     * @param marca Marca del vehículo
+     * @param velocidadMaxima Velocidad máxima en km/h
+     * @param numeroDePuertas Número de puertas del coche
+     */
+    public Coche(String marca, double velocidadMaxima, int numeroDePuertas) {
+        // Llamamos al constructor de la clase base usando super
+        super(marca, velocidadMaxima);
+        this.numeroDePuertas = numeroDePuertas;
+    }
+
+    /**
+     * Método que extiende mostrarInfo con información específica del coche
+     */
+    @Override
+    public void mostrarInfo() {
+        // Llamamos al método de la clase base
+        super.mostrarInfo();
+        System.out.println("Número de Puertas: " + numeroDePuertas);
+    }
+
+    /**
+     * Método específico del coche
+     */
+    public void mostrarInfoCoche() {
+        System.out.println("\n--- Información Completa del Coche ---");
+        System.out.println("Marca: " + marca);
+        System.out.println("Velocidad Máxima: " + velocidadMaxima + " km/h");
+        System.out.println("Número de Puertas: " + numeroDePuertas);
+    }
+
+    /**
+     * Método específico del coche para acelerar
+     */
+    public void acelerar() {
+        System.out.println("El coche " + marca + " está acelerando...");
+    }
+
+    // Getter
+    public int getNumeroDePuertas() {
+        return numeroDePuertas;
+    }
+}
+```
+
+### What `Coche` inherits vs. what it adds
+
+| Source | Member | Inherited / Added |
+|---|---|---|
+| `Vehiculo` | `marca`, `velocidadMaxima` | Inherited (`protected`) |
+| `Vehiculo` | `mostrarInfo()` | **Overridden** — extended via `super.mostrarInfo()` |
+| `Vehiculo` | `getMarca()`, `getVelocidadMaxima()` | Inherited |
+| `Coche` | `numeroDePuertas` | Added (`private`) |
+| `Coche` | `mostrarInfoCoche()`, `acelerar()` | Added |
+| `Coche` | `getNumeroDePuertas()` | Added |
+
+## Usage example
+
+```java
+// Generic vehicle
+Vehiculo vehiculoGenerico = new Vehiculo("Toyota", 180.0);
+vehiculoGenerico.mostrarInfo();
+// --- Información del Vehículo ---
+// Marca: Toyota
+// Velocidad Máxima: 180.0 km/h
+
+// Car — override extends the parent output
+Coche miCoche = new Coche("BMW", 220.0, 4);
+miCoche.mostrarInfo();
+// --- Información del Vehículo ---
+// Marca: BMW
+// Velocidad Máxima: 220.0 km/h
+// Número de Puertas: 4
+
+miCoche.acelerar();
+// El coche BMW está acelerando...
+
+// Polymorphism: declared as Vehiculo, behaves as Coche
+Vehiculo vehiculo = new Coche("Mercedes", 250.0, 5);
+vehiculo.mostrarInfo(); // calls Coche.mostrarInfo(), not Vehiculo.mostrarInfo()
+```
+
+<Note>
+Using `protected` on `marca` and `velocidadMaxima` allows `Coche` to read them directly — see `mostrarInfoCoche()` and `acelerar()`. Private fields in `Vehiculo` would require getters even from within `Coche`.
+</Note>
+
+## Compile & run
+
+```bash
+cd taller8
+javac ejercicio1/Vehiculo.java ejercicio1/Coche.java ejercicio1/PruebaEjercicio1.java
+java ejercicio1.PruebaEjercicio1
+```
+
+Expected output (abridged):
+```
+========== EJERCICIO 1: VEHÍCULO Y COCHE ==========
+
+1. Creando un Vehículo genérico:
+--- Información del Vehículo ---
+Marca: Toyota
+Velocidad Máxima: 180.0 km/h
+
+==================================================
+
+2. Creando un Coche (heredando de Vehículo):
+--- Información del Vehículo ---
+Marca: BMW
+Velocidad Máxima: 220.0 km/h
+Número de Puertas: 4
+```

@@ -1,0 +1,158 @@
+---
+title: "Ejercicio 1: FiguraT11, CirculoT11, and RectanguloT11 — Abstract Area"
+sidebarTitle: "Figura Abstracta"
+description: "Define an abstract FiguraT11 class with an abstract calcularArea() method, then implement it in CirculoT11 and RectanguloT11 with their respective formulas."
+---
+
+Ejercicio 1 builds the simplest possible abstract class hierarchy: a geometric figure. Every figure has a name and must be able to report its area, but the formula for computing that area differs completely between a circle and a rectangle. The abstract class `FiguraT11` captures the common structure — the `nombre` field and the `mostrarArea()` display method — while delegating the actual calculation to each concrete subclass through the abstract method `calcularArea()`.
+
+## Class Hierarchy
+
+```
+FiguraT11  (abstract)
+├── CirculoT11     — area = π × radio²
+└── RectanguloT11  — area = base × altura
+```
+
+---
+
+## `FiguraT11` — Abstract Base Class
+
+`FiguraT11` holds a single protected field `nombre` and declares `calcularArea()` as abstract. Its concrete method `mostrarArea()` calls `calcularArea()` — this is the **template method pattern**: the base class orchestrates the output, but relies on the subclass to supply the numeric result.
+
+```java
+package Taller11;
+
+abstract class FiguraT11 {
+    protected String nombre;
+
+    public FiguraT11(String nombre) {
+        this.nombre = nombre;
+    }
+
+    // Método abstracto que debe ser implementado por las subclases
+    public abstract double calcularArea();
+
+    // Método concreto que utiliza el método abstracto
+    public void mostrarArea() {
+        System.out.println("El área de " + nombre + " es: " + calcularArea());
+    }
+}
+```
+
+### How the Template Method Works
+
+When `mostrarArea()` is called on any `FiguraT11` reference, Java dispatches `calcularArea()` to the **runtime type** of the object — never to the abstract declaration in `FiguraT11`. This means:
+
+- `FiguraT11` defines *when* `calcularArea()` is called (inside `mostrarArea()`).
+- The concrete subclass defines *what* it returns.
+
+---
+
+## `CirculoT11` — Circle Implementation
+
+`CirculoT11` stores a `radio` (radius) and overrides `calcularArea()` using the standard circle-area formula `π × r²` via `Math.PI`.
+
+```java
+package Taller11;
+
+class CirculoT11 extends FiguraT11 {
+    private double radio;
+
+    public CirculoT11(String nombre, double radio) {
+        super(nombre);
+        this.radio = radio;
+    }
+
+    @Override
+    public double calcularArea() {
+        return Math.PI * radio * radio;
+    }
+}
+```
+
+---
+
+## `RectanguloT11` — Rectangle Implementation
+
+`RectanguloT11` stores `base` and `altura` and overrides `calcularArea()` with simple multiplication.
+
+```java
+package Taller11;
+
+class RectanguloT11 extends FiguraT11 {
+    private double base;
+    private double altura;
+
+    public RectanguloT11(String nombre, double base, double altura) {
+        super(nombre);
+        this.base = base;
+        this.altura = altura;
+    }
+
+    @Override
+    public double calcularArea() {
+        return base * altura;
+    }
+}
+```
+
+---
+
+## Polymorphism with Abstract Classes
+
+Because both concrete classes extend `FiguraT11`, variables of type `FiguraT11` can hold either subtype. The correct `calcularArea()` is selected at runtime through dynamic dispatch:
+
+```java
+package Taller11;
+
+public class MainEjercicio1T11 {
+    public static void main(String[] args) {
+        System.out.println("--- Demostración de Clases Abstractas (Ejercicio 1) ---");
+
+        // No se puede instanciar directamente una clase abstracta:
+        // FiguraT11 figura = new FiguraT11("Figura Genérica"); // Esto daría un error de compilación
+
+        CirculoT11 circulo = new CirculoT11("Círculo Grande", 5.0);
+        RectanguloT11 rectangulo = new RectanguloT11("Rectángulo Pequeño", 4.0, 6.0);
+
+        circulo.mostrarArea();
+        rectangulo.mostrarArea();
+
+        System.out.println("\n--- Polimorfismo con Clases Abstractas ---");
+        FiguraT11 f1 = new CirculoT11("Círculo Mediano", 3.5);
+        FiguraT11 f2 = new RectanguloT11("Rectángulo Largo", 8.0, 2.5);
+
+        f1.mostrarArea(); // calls CirculoT11's calcularArea()
+        f2.mostrarArea(); // calls RectanguloT11's calcularArea()
+    }
+}
+```
+
+### Expected Output
+
+```
+--- Demostración de Clases Abstractas (Ejercicio 1) ---
+El área de Círculo Grande es: 78.53981633974483
+El área de Rectángulo Pequeño es: 24.0
+
+--- Polimorfismo con Clases Abstractas ---
+El área de Círculo Mediano es: 38.48451000647496
+El área de Rectángulo Largo es: 20.0
+```
+
+<Tip>
+Even though `f1` and `f2` are declared as `FiguraT11`, Java always calls the overriding implementation in the actual object's class. This is dynamic (runtime) polymorphism in action — the same method call produces different results based solely on the runtime type.
+</Tip>
+
+---
+
+## Compile & Run
+
+```bash
+# From the project root
+javac Taller11/Figura.java Taller11/Circulo.java Taller11/Rectangulo.java Taller11/MainEjercicio1T11.java
+
+# Run
+java Taller11.MainEjercicio1T11
+```

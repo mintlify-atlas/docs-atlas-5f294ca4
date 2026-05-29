@@ -1,0 +1,167 @@
+---
+title: "Polymorphism in Java: Runtime Method Dispatch"
+sidebarTitle: "Polymorphism"
+description: "Explore runtime polymorphism in Java — how the JVM dispatches method calls to the correct subclass implementation at runtime using @Override."
+---
+
+Polymorphism — Greek for "many shapes" — is the ability to treat objects of different classes through a single common type, while each object still behaves according to its own specific implementation. In Java, this happens automatically at runtime: the JVM looks at the actual type of the object, not the type of the variable holding it, and calls the right method. The result is code that is both general and precise — written once in terms of a parent type, it works correctly for every subclass without a single `if`-statement.
+
+## A Parent Reference Holding a Child Object
+
+Java allows you to assign a subclass instance to a variable whose declared type is the parent class:
+
+```java
+PersonaT10 p1 = new EstudianteT10("Pedro", "Diseño Gráfico");
+PersonaT10 p2 = new ProfesorT10("Laura", "Física");
+```
+
+`p1` and `p2` are typed as `PersonaT10`, but they actually hold `EstudianteT10` and `ProfesorT10` objects. When you call a method on them, the JVM dispatches to the subclass version — this is called **dynamic dispatch**.
+
+---
+
+## Method Overriding with `@Override`
+
+**Overriding** means a subclass provides its own implementation of a method that already exists in the parent, using the **exact same signature** (name, parameter types, and return type). The `@Override` annotation tells the compiler to verify this — if the signature doesn't match any parent method, compilation fails immediately.
+
+```java
+// PersonaT10.java
+class PersonaT10 {
+    String nombre;
+
+    public PersonaT10(String nombre) {
+        this.nombre = nombre;
+    }
+
+    public void presentarse() {
+        System.out.println("Hola, soy " + nombre + ".");
+    }
+}
+```
+
+```java
+// EstudianteT10.java
+class EstudianteT10 extends PersonaT10 {
+    String carrera;
+
+    public EstudianteT10(String nombre, String carrera) {
+        super(nombre);
+        this.carrera = carrera;
+    }
+
+    @Override
+    public void presentarse() {
+        System.out.println("Hola, soy " + nombre + " y estudio " + carrera + ".");
+    }
+}
+```
+
+```java
+// ProfesorT10.java
+class ProfesorT10 extends PersonaT10 {
+    String especialidad;
+
+    public ProfesorT10(String nombre, String especialidad) {
+        super(nombre);
+        this.especialidad = especialidad;
+    }
+
+    @Override
+    public void presentarse() {
+        System.out.println("Hola, soy el profesor " + nombre
+                + " y mi especialidad es " + especialidad + ".");
+    }
+}
+```
+
+---
+
+## Dynamic Dispatch in Action
+
+`MainEjercicio1T10` shows the full picture — concrete calls and polymorphic calls side by side:
+
+```java
+public class MainEjercicio1T10 {
+    public static void main(String[] args) {
+
+        // Concrete references — type matches the object
+        PersonaT10   persona    = new PersonaT10("Carlos");
+        EstudianteT10 estudiante = new EstudianteT10("Ana", "Ingeniería de Software");
+        ProfesorT10  profesor   = new ProfesorT10("María", "Matemáticas");
+
+        persona.presentarse();    // "Hola, soy Carlos."
+        estudiante.presentarse(); // "Hola, soy Ana y estudio Ingeniería de Software."
+        profesor.presentarse();   // "Hola, soy el profesor María..."
+
+        System.out.println("\n--- Polimorfismo ---");
+
+        // Parent-typed references holding child objects — dynamic dispatch
+        PersonaT10 p1 = new EstudianteT10("Pedro", "Diseño Gráfico");
+        PersonaT10 p2 = new ProfesorT10("Laura", "Física");
+
+        p1.presentarse(); // calls EstudianteT10.presentarse() — "Hola, soy Pedro y estudio..."
+        p2.presentarse(); // calls ProfesorT10.presentarse()  — "Hola, soy el profesor Laura..."
+    }
+}
+```
+
+Even though `p1` is declared as `PersonaT10`, the JVM calls `EstudianteT10.presentarse()` because the underlying object is an `EstudianteT10`. The compile-time type determines what you *can* call; the runtime type determines *which implementation* runs.
+
+---
+
+## Overloading vs. Overriding
+
+These two concepts are easy to confuse. The key distinction is the method **signature**:
+
+| | Signature | Resolved at | Annotation |
+|---|---|---|---|
+| **Overriding** | Identical to parent | Runtime | `@Override` required (best practice) |
+| **Overloading** | Different parameter list | Compile-time | Not applicable |
+
+`MainEjercicio3T10` demonstrates the pitfall of confusing the two. `ClaseDerivadaT10` attempts to "override" `metodoSobrescrito()` by adding a parameter — but this creates an **overloaded** method, not an overridden one. The original `metodoSobrescrito()` is still there, just silently unoverridden:
+
+```java
+class ClaseBaseT10 {
+    public void metodoSobrescrito() {
+        System.out.println("Método sobrescrito de ClaseBaseT10.");
+    }
+}
+
+class ClaseDerivadaT10 extends ClaseBaseT10 {
+
+    // ⚠️ This is an OVERLOAD, not an override — different signature
+    public void metodoSobrescrito(int numero) {
+        System.out.println("Método sobrecargado con número: " + numero);
+    }
+
+    // This IS an override — same signature — but missing @Override (bad practice)
+    public void metodoSobrescrito() {
+        System.out.println("Método sobrescrito de ClaseDerivadaT10 (sin @Override).");
+    }
+}
+```
+
+The clearest way to see the danger: if `ClaseBaseT10` later renames its method, the "override" in `ClaseDerivadaT10` silently becomes an unrelated method. `@Override` would have caught the mismatch immediately.
+
+### Correct `@Override` vs. Accidental Overload
+
+```java
+// ✅ CORRECT — override, same signature, compiler-verified
+class CorrectSubclass extends ClaseBaseT10 {
+    @Override
+    public void metodoSobrescrito() {
+        System.out.println("Correctly overriding the parent method.");
+    }
+}
+
+// ❌ DANGEROUS — this is an overload, not an override
+//    The parent's metodoSobrescrito() is still inherited unchanged
+class BuggySubclass extends ClaseBaseT10 {
+    public void metodoSobrescrito(int numero) {  // different signature!
+        System.out.println("I thought I was overriding, but I'm not.");
+    }
+}
+```
+
+<Tip>
+Always annotate intended overrides with `@Override`. The annotation costs nothing and makes the compiler catch any signature mismatch at compile time — before it becomes a hard-to-debug runtime surprise.
+</Tip>

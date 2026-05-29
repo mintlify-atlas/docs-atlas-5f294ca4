@@ -1,0 +1,65 @@
+---
+title: "Taller 8: Java Single Inheritance with extends"
+sidebarTitle: "Overview"
+description: "Overview of Taller 8 — four exercises exploring single inheritance in Java: constructor chaining, method overriding, and multiple inheritance restrictions."
+---
+
+Taller 8 teaches how Java implements single inheritance using the `extends` keyword, how subclasses chain constructors with `super()`, and what happens when you try invalid inheritance patterns. By working through four progressively richer exercises you will see how a subclass inherits fields and methods, adds its own state, calls the parent constructor exactly once as the first statement, and selectively overrides behaviour while still delegating to the parent via `super`.
+
+<CardGroup cols={2}>
+  <Card title="Ejercicio 1 — Vehiculo → Coche" icon="car" href="./ejercicio1-vehiculo-coche">
+    Define a `Vehiculo` base class with `protected` fields, then extend it with `Coche` which adds `numeroDePuertas` and overrides `mostrarInfo()` by delegating to `super.mostrarInfo()` before printing its own line.
+  </Card>
+  <Card title="Ejercicio 2 — Persona → Estudiante" icon="user-graduate" href="./ejercicio2-persona-estudiante">
+    Extend the `Persona` base class with `Estudiante`. Demonstrates constructor chaining with `super(nombre, edad)` and overloaded constructors that accept an optional starting `promedio`.
+  </Card>
+  <Card title="Ejercicio 3 — Empleado → Gerente" icon="briefcase" href="./ejercicio3-empleado-gerente">
+    Override `calcularBono()` in `Gerente` to compute a higher bonus (15% base salary + 2% per managed employee) while inheriting all of `Empleado`'s core fields and behaviour.
+  </Card>
+  <Card title="Ejercicio 4 — Multiple Inheritance Pitfalls" icon="triangle-exclamation" href="./ejercicio4-herencia-multiple">
+    See the exact compiler error produced by `class ClaseC extends ClaseA, ClaseB`, understand why `private` fields are invisible even inside subclasses, and learn the two correct workarounds: interfaces and getters.
+  </Card>
+</CardGroup>
+
+## Key concepts
+
+| Concept | What it does |
+|---|---|
+| `extends` | Declares that a class inherits from exactly one parent class |
+| `super()` | Calls the parent constructor — must be the first statement in the child constructor |
+| `super.method()` | Calls the parent's version of an overridden method from inside the override |
+| `@Override` | Annotation that tells the compiler to verify the method signature actually matches a parent method |
+| `protected` fields | Fields that are accessible directly from subclasses (and the same package), unlike `private` fields which require getters even from child classes |
+| Single-inheritance rule | Java allows `extends` from only one class per subclass, eliminating the diamond problem |
+
+## Compile & run commands
+
+All source files live inside numbered packages. Compile from the `taller8` directory.
+
+**Ejercicio 1 — Vehiculo & Coche**
+```bash
+cd taller8
+javac ejercicio1/Vehiculo.java ejercicio1/Coche.java ejercicio1/PruebaEjercicio1.java
+java ejercicio1.PruebaEjercicio1
+```
+
+**Ejercicio 2 — Persona & Estudiante**
+```bash
+javac ejercicio2/Persona.java ejercicio2/Estudiante.java ejercicio2/PruebaEjercicio2.java
+java ejercicio2.PruebaEjercicio2
+```
+
+**Ejercicio 3 — Empleado & Gerente**
+```bash
+javac ejercicio3/Empleado.java ejercicio3/Gerente.java ejercicio3/PruebaEjercicio3.java
+java ejercicio3.PruebaEjercicio3
+```
+
+**Ejercicio 4 — Multiple Inheritance**
+```bash
+# Compile only the valid files (ClaseC.java intentionally does not compile)
+javac ejercicio4/ClaseA.java ejercicio4/ClaseB.java ejercicio4/InterfazB.java \
+      ejercicio4/ClaseC_CORRECTO.java ejercicio4/Vehiculo.java \
+      ejercicio4/Coche_CORRECTO.java ejercicio4/PruebaEjercicio4.java
+java ejercicio4.PruebaEjercicio4
+```

@@ -1,0 +1,78 @@
+---
+title: "Taller 9: The super Keyword and Inheritance Pitfalls"
+sidebarTitle: "Overview"
+description: "Overview of Taller 9 — three exercises demonstrating super() constructor chaining, super.method() delegation, and what happens when you misuse super."
+---
+
+Taller 9 focuses on the `super` keyword — how to call a parent class constructor from a subclass constructor, how to invoke an overridden parent method from within a subclass method, and what the Java compiler rejects when `super` is used incorrectly. Working through these three exercises gives you a concrete picture of how the JVM wires parent and child class initialisation together and where the boundaries of `super` lie.
+
+<CardGroup cols={3}>
+  <Card title="Ejercicio 1: Persona & Empleado" icon="user-tie" href="/taller9/ejercicio1-persona-empleado">
+    Chain constructors between `Persona` and `Empleado` using `super(nombre, edad)`, then delegate to the parent's `mostrarDetalles()` via `super.mostrarDetalles()`.
+  </Card>
+  <Card title="Ejercicio 2: Animal & Pez" icon="fish" href="/taller9/ejercicio2-animal-pez">
+    Extend `Animal` with `Pez`, passing the `especie` argument up with `super(especie)` and enriching the output with the subclass-specific `tipoDeAgua` field.
+  </Card>
+  <Card title="Ejercicio 3: super Pitfalls" icon="triangle-exclamation" href="/taller9/ejercicio3-super-private">
+    See two deliberate compile-time errors: using `super` inside a `static` method and trying to reach a `private` parent field directly through `super`.
+  </Card>
+</CardGroup>
+
+---
+
+## Key Concepts
+
+### `super()` in constructors
+
+When a subclass constructor calls `super(...)`, it delegates the initialisation of the inherited fields to the parent constructor. This call **must be the first statement** in the subclass constructor.
+
+```java
+public Empleado(String nombre, int edad, String departamento) {
+    super(nombre, edad); // must come first — initialises Persona's fields
+    this.departamento = departamento;
+}
+```
+
+### `super.method()` in instance methods
+
+Inside an overriding instance method you can still run the parent's version of that method by prefixing the call with `super.`:
+
+```java
+@Override
+public void mostrarDetalles() {
+    super.mostrarDetalles(); // runs Persona.mostrarDetalles()
+    System.out.println("Departamento: " + departamento);
+}
+```
+
+### Why `super` fails in a static context
+
+`super` is a reference to the parent portion of the **current object** (`this`). Static methods do not have a `this` reference, so `super` is meaningless there and the compiler rejects it:
+
+```
+error: non-static variable super cannot be referenced from a static context
+```
+
+### Private vs protected members
+
+| Modifier | Subclass can read via `super`? |
+|---|---|
+| `public` | ✅ Yes |
+| `protected` | ✅ Yes |
+| `private` | ❌ No — use a getter |
+
+---
+
+## Compile & Run
+
+All classes live in the `Taller9` package. From the project root (the directory that contains the `Taller9/` folder):
+
+```bash
+# Compile all sources for this taller
+javac Taller9/*.java
+
+# Run each main class
+java Taller9.MainEjercicio1
+java Taller9.MainEjercicio2
+java Taller9.MainEjercicio3
+```

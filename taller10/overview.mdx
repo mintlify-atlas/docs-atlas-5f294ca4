@@ -1,0 +1,83 @@
+---
+title: "Taller 10: Polymorphism and Method Overriding in Java"
+sidebarTitle: "Overview"
+description: "Overview of Taller 10 — three exercises on runtime polymorphism: @Override, dynamic dispatch, overloading vs overriding pitfalls."
+---
+
+Taller 10 demonstrates one of the most powerful ideas in object-oriented programming: polymorphism. When a parent-type reference holds a subclass instance, the JVM dispatches method calls to the subclass's overridden implementation at runtime — not to the version declared in the variable's compile-time type. The three exercises in this workshop build intuition for that mechanism, show it applied to real domain hierarchies, and then deliberately break it to reveal the overloading-vs-overriding pitfall that trips up even experienced developers.
+
+## Exercises
+
+<CardGroup cols={3}>
+  <Card
+    title="Ejercicio 1: Persona Polymorphism"
+    icon="people-group"
+    href="/taller10/ejercicio1-persona-polimorfismo"
+  >
+    PersonaT10 references holding EstudianteT10 and ProfesorT10 objects dispatch
+    to the correct overridden `presentarse()` at runtime.
+  </Card>
+  <Card
+    title="Ejercicio 2: VehiculoT10 & BicicletaT10"
+    icon="bicycle"
+    href="/taller10/ejercicio2-vehiculo-bicicleta"
+  >
+    Override `moverse()` in BicicletaT10 and observe polymorphic behavior when
+    calling through a VehiculoT10 reference.
+  </Card>
+  <Card
+    title="Ejercicio 3: Override Pitfalls"
+    icon="triangle-exclamation"
+    href="/taller10/ejercicio3-override-pitfalls"
+  >
+    See how a signature change silently creates an overload instead of an
+    override, and why omitting `@Override` makes such bugs invisible.
+  </Card>
+</CardGroup>
+
+## Key Concepts
+
+### `@Override`
+
+The `@Override` annotation tells the compiler to verify that the annotated method actually overrides a method inherited from a superclass (or implements one declared in an interface). If the signatures do not match, the compiler fails immediately — preventing silent overload bugs.
+
+```java
+@Override
+public void presentarse() {          // ✅ compiler confirms PersonaT10 has this signature
+    System.out.println("Hola, soy " + nombre + " y estudio " + carrera + ".");
+}
+```
+
+### Dynamic Dispatch
+
+Java resolves overridden method calls at runtime based on the **actual type of the object**, not the declared type of the reference variable. This is called *dynamic dispatch* (or *virtual dispatch*):
+
+```java
+PersonaT10 p = new EstudianteT10("Pedro", "Diseño Gráfico");
+p.presentarse(); // Dispatches to EstudianteT10.presentarse(), not PersonaT10.presentarse()
+```
+
+The variable `p` is typed as `PersonaT10`, but because the object stored in it is an `EstudianteT10`, the JVM invokes `EstudianteT10`'s version of `presentarse()`.
+
+### Overloading vs Overriding
+
+| | Overloading | Overriding |
+|---|---|---|
+| **Definition** | Same method name, different parameter list | Same method name **and** same parameter list, in a subclass |
+| **Resolved at** | Compile time | Runtime |
+| **Polymorphism** | ❌ Static — no dynamic dispatch | ✅ Dynamic — enables polymorphism |
+| **`@Override` annotation** | Would cause a compile error | Strongly recommended |
+
+## Compile & Run
+
+All classes live in the `Taller10` package. Compile from the project root:
+
+```bash
+# Compile all Taller 10 sources
+javac Taller10/*.java
+
+# Run each exercise
+java Taller10.MainEjercicio1T10
+java Taller10.MainEjercicio2T10
+java Taller10.MainEjercicio3T10
+```

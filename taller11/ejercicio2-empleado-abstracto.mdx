@@ -1,0 +1,182 @@
+---
+title: "Ejercicio 2: Abstract Empleado with Gerente and Vendedor Salary Contracts"
+sidebarTitle: "Empleado Abstracto"
+description: "Model an abstract Empleado class requiring subclasses to implement calcularSalario(), with Gerente and Vendedor providing different salary formulas."
+---
+
+Ejercicio 2 applies the abstract class pattern to a business domain: employee payroll. Different employee types earn their salary in fundamentally different ways — a `Gerente` receives a fixed base salary plus a discretionary bonus, while a `Vendedor` earns a base salary supplemented by a commission on sales. The abstract class `Empleado` enforces the `calcularSalario()` contract on every subclass, ensuring that any employee object can always report its salary without the caller needing to know which type it is.
+
+## Class Hierarchy
+
+```
+Empleado  (abstract)
+├── Gerente   — salario = salarioBase + bono
+└── Vendedor  — salario = salarioBase + comisionPorVentas
+```
+
+---
+
+## `Empleado` — Abstract Base Class
+
+`Empleado` stores the shared identity fields `nombre` and `id`, declares `calcularSalario()` as abstract, and provides the concrete `mostrarDetalles()` method that prints all three pieces of information. Like the template method pattern seen in Ejercicio 1, `mostrarDetalles()` in the abstract class calls `calcularSalario()` — the base class relies on the subclass to resolve the salary at runtime.
+
+```java
+package Taller11;
+
+abstract class Empleado {
+    protected String nombre;
+    protected String id;
+
+    public Empleado(String nombre, String id) {
+        this.nombre = nombre;
+        this.id = id;
+    }
+
+    // Método abstracto para calcular el salario, implementado por las subclases
+    public abstract double calcularSalario();
+
+    // Método concreto para mostrar detalles, utilizando el método abstracto
+    public void mostrarDetalles() {
+        System.out.println("Nombre: " + nombre);
+        System.out.println("ID: " + id);
+        System.out.println("Salario: " + calcularSalario());
+    }
+}
+```
+
+### Why `mostrarDetalles()` Calls the Abstract Method
+
+`mostrarDetalles()` is written once in `Empleado` and never duplicated. When it reaches `calcularSalario()`, Java dispatches to whichever subclass is currently executing — `Gerente` or `Vendedor`. The abstract class therefore defines the *display contract* while leaving the *salary contract* to each concrete type.
+
+---
+
+## `Gerente` — Fixed Salary + Bonus
+
+A `Gerente` receives a guaranteed `salarioBase` plus an additional `bono`. Both values are set at construction time, making the salary deterministic and unchanging per instance.
+
+```java
+package Taller11;
+
+class Gerente extends Empleado {
+    private double salarioBase;
+    private double bono;
+
+    public Gerente(String nombre, String id, double salarioBase, double bono) {
+        super(nombre, id);
+        this.salarioBase = salarioBase;
+        this.bono = bono;
+    }
+
+    @Override
+    public double calcularSalario() {
+        return salarioBase + bono;
+    }
+}
+```
+
+**Formula:** `salario = salarioBase + bono`
+
+---
+
+## `Vendedor` — Base Salary + Commission
+
+A `Vendedor` also has a `salarioBase`, but the variable component is `comisionPorVentas` — a commission that reflects sales performance. The formula is structurally identical to `Gerente`'s but semantically distinct: the added component is earned through sales activity rather than granted as a management bonus.
+
+```java
+package Taller11;
+
+class Vendedor extends Empleado {
+    private double salarioBase;
+    private double comisionPorVentas;
+
+    public Vendedor(String nombre, String id, double salarioBase, double comisionPorVentas) {
+        super(nombre, id);
+        this.salarioBase = salarioBase;
+        this.comisionPorVentas = comisionPorVentas;
+    }
+
+    @Override
+    public double calcularSalario() {
+        return salarioBase + comisionPorVentas;
+    }
+}
+```
+
+**Formula:** `salario = salarioBase + comisionPorVentas`
+
+---
+
+## Usage — `MainEjercicio2`
+
+The main class demonstrates both direct instantiation with concrete types and polymorphic usage through the `Empleado` reference:
+
+```java
+package Taller11;
+
+public class MainEjercicio2 {
+    public static void main(String[] args) {
+        System.out.println("\n--- Demostración de Clases Abstractas (Ejercicio 2) ---");
+
+        Gerente gerente = new Gerente("Laura Pérez", "G001", 5000.0, 1000.0);
+        Vendedor vendedor = new Vendedor("Pedro Gómez", "V001", 2000.0, 500.0);
+
+        System.out.println("Detalles del Gerente:");
+        gerente.mostrarDetalles();
+
+        System.out.println("\nDetalles del Vendedor:");
+        vendedor.mostrarDetalles();
+
+        System.out.println("\n--- Polimorfismo con Clases Abstractas ---");
+        Empleado emp1 = new Gerente("Ana Ruiz", "G002", 5500.0, 1200.0);
+        Empleado emp2 = new Vendedor("Juan López", "V002", 2200.0, 600.0);
+
+        System.out.println("Detalles del Empleado (Gerente):");
+        emp1.mostrarDetalles();
+
+        System.out.println("\nDetalles del Empleado (Vendedor):");
+        emp2.mostrarDetalles();
+    }
+}
+```
+
+### Expected Output
+
+```
+--- Demostración de Clases Abstractas (Ejercicio 2) ---
+Detalles del Gerente:
+Nombre: Laura Pérez
+ID: G001
+Salario: 6000.0
+
+Detalles del Vendedor:
+Nombre: Pedro Gómez
+ID: V001
+Salario: 2500.0
+
+--- Polimorfismo con Clases Abstractas ---
+Detalles del Empleado (Gerente):
+Nombre: Ana Ruiz
+ID: G002
+Salario: 6700.0
+
+Detalles del Empleado (Vendedor):
+Nombre: Juan López
+ID: V002
+Salario: 2800.0
+```
+
+<Tip>
+`emp1` and `emp2` are declared as `Empleado`, yet `mostrarDetalles()` correctly prints the right salary for each. This is the power of the abstract contract: the caller never needs to know whether it holds a `Gerente` or a `Vendedor` to ask for its details.
+</Tip>
+
+---
+
+## Compile & Run
+
+```bash
+# From the project root
+javac Taller11/Empleado.java Taller11/Gerente.java Taller11/Vendedor.java Taller11/MainEjercicio2.java
+
+# Run
+java Taller11.MainEjercicio2
+```

@@ -1,0 +1,144 @@
+---
+title: "Abstract Classes in Java: Enforcing Contracts with abstract"
+sidebarTitle: "Abstract Classes"
+description: "Learn how Java abstract classes define method contracts that subclasses must implement, enabling polymorphism without direct instantiation."
+---
+
+Sometimes a class represents a concept so general that it makes no sense to create an instance of it directly. A "shape" has an area — but what is the area of a shape in the abstract? The calculation is different for a circle, a rectangle, and a triangle. Abstract classes exist precisely for this situation: they define the *contract* (every shape must be able to calculate its area) while leaving the *implementation* to each concrete subclass. This combination of structure and flexibility is the foundation of many powerful design patterns.
+
+## What an Abstract Class Is
+
+An abstract class is declared with the `abstract` keyword on the class definition. Two things immediately follow:
+
+1. You **cannot** create an instance of it with `new`.
+2. It can declare **abstract methods** — method signatures with no body — that every non-abstract subclass must implement.
+
+```java
+abstract class Shape {
+    public abstract double calcularArea(); // no body — subclass must provide one
+}
+```
+
+A subclass that does not implement every inherited abstract method must itself be declared `abstract`, passing the obligation down the chain.
+
+---
+
+## The `abstract` Keyword on Methods
+
+An abstract method has a signature but no implementation block — just a semicolon:
+
+```java
+public abstract double calcularArea();
+```
+
+The compiler guarantees that by the time you have a concrete (non-abstract) instance, `calcularArea()` has been implemented. This is the contract: you can write code that calls `calcularArea()` on any `FiguraT11` reference without knowing which concrete subclass it is, and the right implementation will run.
+
+---
+
+## `FiguraT11` — The Abstract Base Class (Taller 11)
+
+The `Figura` class from Taller 11 demonstrates the pattern cleanly. It declares one abstract method (`calcularArea()`) and one concrete method (`mostrarArea()`) that calls it:
+
+```java
+// Taller11/Figura.java
+abstract class FiguraT11 {
+    protected String nombre;
+
+    public FiguraT11(String nombre) {
+        this.nombre = nombre;
+    }
+
+    // Contract: every concrete subclass must calculate its own area
+    public abstract double calcularArea();
+
+    // Concrete method — reusable by all subclasses
+    public void mostrarArea() {
+        System.out.println("El área de " + nombre + " es: " + calcularArea());
+    }
+}
+```
+
+`mostrarArea()` is written once. It calls `calcularArea()` which, at runtime, dispatches to whichever subclass is actually in memory. This is the power of combining abstraction with polymorphism.
+
+---
+
+## Concrete Subclasses: `CirculoT11` and `RectanguloT11`
+
+Each shape provides its own formula for `calcularArea()`:
+
+```java
+// Taller11/Circulo.java
+class CirculoT11 extends FiguraT11 {
+    private double radio;
+
+    public CirculoT11(String nombre, double radio) {
+        super(nombre);
+        this.radio = radio;
+    }
+
+    @Override
+    public double calcularArea() {
+        return Math.PI * radio * radio;
+    }
+}
+```
+
+```java
+// Taller11/Rectangulo.java
+class RectanguloT11 extends FiguraT11 {
+    private double base;
+    private double altura;
+
+    public RectanguloT11(String nombre, double base, double altura) {
+        super(nombre);
+        this.base = base;
+        this.altura = altura;
+    }
+
+    @Override
+    public double calcularArea() {
+        return base * altura;
+    }
+}
+```
+
+In `MainEjercicio1T11`, both shapes are used through `FiguraT11` references — the same `mostrarArea()` call produces geometrically correct output for each:
+
+```java
+FiguraT11 f1 = new CirculoT11("Círculo Mediano", 3.5);
+FiguraT11 f2 = new RectanguloT11("Rectángulo Largo", 8.0, 2.5);
+
+f1.mostrarArea(); // El área de Círculo Mediano es: 38.484...
+f2.mostrarArea(); // El área de Rectángulo Largo es: 20.0
+```
+
+---
+
+## Abstract Class vs. Interface
+
+Both abstract classes and interfaces define contracts, but they serve different purposes:
+
+| Feature | Abstract class | Interface |
+|---|---|---|
+| Instantiation | ❌ Cannot instantiate | ❌ Cannot instantiate |
+| Constructors | ✅ Can have constructors | ❌ No constructors |
+| Instance fields | ✅ Can have instance fields | ❌ Only constants (`static final`) |
+| Concrete methods | ✅ Can have concrete methods | ✅ `default` methods (Java 8+) |
+| Inheritance limit | One parent class | Implement multiple interfaces |
+| Best used for | A shared base type with common state | A behavioral role/capability |
+
+Use an abstract class when the subclasses share state (fields) or common behavior that belongs to a natural "is-a" hierarchy. Use interfaces when you need to define a capability that cuts across different hierarchies — see [Interfaces](/concepts/interfaces) for details.
+
+---
+
+<Note>
+You cannot do `new FiguraT11(...)` — the compiler will reject it. Instantiate the concrete subclass instead.
+
+```java
+// ❌ Compile error: FiguraT11 is abstract; cannot be instantiated
+FiguraT11 f = new FiguraT11("Genérica");
+
+// ✅ Correct: instantiate a concrete subclass
+FiguraT11 f = new CirculoT11("Círculo", 5.0);
+```
+</Note>

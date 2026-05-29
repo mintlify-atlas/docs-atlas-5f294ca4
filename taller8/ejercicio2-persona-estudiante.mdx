@@ -1,0 +1,250 @@
+---
+title: "Ejercicio 2: Persona and Estudiante — Constructor Chaining with super()"
+sidebarTitle: "Persona & Estudiante"
+description: "Extend the Persona base class with Estudiante, using super() to chain constructors and adding carrera-specific behavior."
+---
+
+Ejercicio 2 focuses on constructor chaining. `Persona` provides a two-parameter constructor that initialises `nombre` and `edad`. `Estudiante` adds `matricula` and `promedio`, and offers two overloaded constructors: one that starts `promedio` at `0.0` and a second that accepts an explicit initial average. Both constructors begin with `super(nombre, edad)`, delegating parent field initialisation to `Persona` before setting the student-specific fields. The exercise also demonstrates how inherited methods like `saludar()` and `cumplirAnios()` work unchanged on a `Estudiante` object, and how overriding `mostrarDetalles()` enables polymorphic dispatch across a `Persona[]` array.
+
+## Inheritance hierarchy
+
+```
+Persona
+  └── extends ──> Estudiante
+```
+
+## Persona — base class
+
+```java
+package ejercicio2;
+
+/**
+ * Clase base que representa una persona
+ */
+public class Persona {
+
+    // Atributos protegidos
+    protected String nombre;
+    protected int edad;
+
+    /**
+     * Constructor de la clase Persona
+     * @param nombre Nombre de la persona
+     * @param edad Edad de la persona
+     */
+    public Persona(String nombre, int edad) {
+        this.nombre = nombre;
+        this.edad = edad;
+    }
+
+    /**
+     * Método para mostrar los detalles de la persona
+     */
+    public void mostrarDetalles() {
+        System.out.println("--- Detalles de la Persona ---");
+        System.out.println("Nombre: " + nombre);
+        System.out.println("Edad: " + edad + " años");
+    }
+
+    /**
+     * Método que simula un sonido de saludo
+     */
+    public void saludar() {
+        System.out.println("Hola, mi nombre es " + nombre);
+    }
+
+    /**
+     * Método que simula cumplir años
+     */
+    public void cumplirAnios() {
+        edad++;
+        System.out.println(nombre + " acaba de cumplir " + edad + " años");
+    }
+
+    // Getters y Setters
+    public String getNombre() { return nombre; }
+    public int getEdad()      { return edad; }
+    public void setEdad(int edad) { this.edad = edad; }
+}
+```
+
+### Persona members
+
+| Member | Visibility | Description |
+|---|---|---|
+| `nombre` | `protected` | Person's name |
+| `edad` | `protected` | Person's age |
+| `mostrarDetalles()` | `public` | Prints name and age |
+| `saludar()` | `public` | Prints a greeting using `nombre` |
+| `cumplirAnios()` | `public` | Increments `edad` and announces the new age |
+
+## Estudiante — derived class
+
+```java
+package ejercicio2;
+
+/**
+ * Clase que hereda de Persona y representa un estudiante
+ */
+public class Estudiante extends Persona {
+
+    // Atributo específico del estudiante
+    private String matricula;
+    private double promedio;
+
+    /**
+     * Constructor de la clase Estudiante
+     * @param nombre Nombre del estudiante
+     * @param edad Edad del estudiante
+     * @param matricula Número de matrícula
+     */
+    public Estudiante(String nombre, int edad, String matricula) {
+        // Llamamos al constructor de la clase base
+        super(nombre, edad);
+        this.matricula = matricula;
+        this.promedio = 0.0;
+    }
+
+    /**
+     * Constructor sobrecargado con promedio
+     */
+    public Estudiante(String nombre, int edad, String matricula, double promedio) {
+        super(nombre, edad);
+        this.matricula = matricula;
+        this.promedio = promedio;
+    }
+
+    /**
+     * Sobrescribimos el método mostrarDetalles de Persona
+     * Agregamos información específica del estudiante
+     */
+    @Override
+    public void mostrarDetalles() {
+        System.out.println("--- Detalles del Estudiante ---");
+        System.out.println("Nombre: " + nombre);
+        System.out.println("Edad: " + edad + " años");
+        System.out.println("Matrícula: " + matricula);
+        System.out.println("Promedio: " + promedio);
+    }
+
+    /**
+     * Método específico del estudiante: estudiar
+     */
+    public void estudiar() {
+        System.out.println(nombre + " está estudiando...");
+    }
+
+    /**
+     * Método específico del estudiante: presentar examen
+     */
+    public void presentarExamen(String materia, double calificacion) {
+        System.out.println(nombre + " presentó el examen de " + materia);
+        System.out.println("Calificación obtenida: " + calificacion);
+        // Actualizar promedio (simplificado)
+        this.promedio = (this.promedio + calificacion) / 2;
+    }
+
+    /**
+     * Método específico del estudiante: asistir a clase
+     */
+    public void asistirAClase(String materia) {
+        System.out.println(nombre + " asistió a la clase de " + materia);
+    }
+
+    /**
+     * Método específico del estudiante: trabajar en proyecto
+     */
+    public void trabajarEnProyecto(String nombreProyecto) {
+        System.out.println(nombre + " está trabajando en el proyecto: " + nombreProyecto);
+    }
+
+    // Getters y Setters
+    public String getMatricula()          { return matricula; }
+    public double getPromedio()           { return promedio; }
+    public void setPromedio(double p)     { this.promedio = p; }
+}
+```
+
+### What `Estudiante` inherits vs. what it adds
+
+| Source | Member | Status |
+|---|---|---|
+| `Persona` | `nombre`, `edad` | Inherited (`protected`) |
+| `Persona` | `saludar()`, `cumplirAnios()` | Inherited — used unchanged |
+| `Persona` | `mostrarDetalles()` | **Overridden** — includes `matricula` and `promedio` |
+| `Estudiante` | `matricula`, `promedio` | Added (`private`) |
+| `Estudiante` | `estudiar()`, `presentarExamen()`, `asistirAClase()`, `trabajarEnProyecto()` | Added |
+
+## Usage example
+
+```java
+// Plain Persona
+Persona persona = new Persona("Juan García", 35);
+persona.mostrarDetalles();
+// --- Detalles de la Persona ---
+// Nombre: Juan García
+// Edad: 35 años
+
+// Estudiante with default promedio = 0.0
+Estudiante estudiante1 = new Estudiante("María López", 20, "A202400123");
+estudiante1.mostrarDetalles();
+// --- Detalles del Estudiante ---
+// Nombre: María López
+// Edad: 20 años
+// Matrícula: A202400123
+// Promedio: 0.0
+
+// Inherited method works unchanged
+estudiante1.saludar();       // Hola, mi nombre es María López
+estudiante1.estudiar();      // María López está estudiando...
+
+// Overloaded constructor with starting promedio
+Estudiante estudiante2 = new Estudiante("Carlos Rodríguez", 22, "B202400456", 78.0);
+estudiante2.presentarExamen("Bases de Datos", 90.0);
+System.out.println("Nuevo promedio: " + estudiante2.getPromedio()); // 84.0
+
+// Inherited cumplirAnios
+estudiante1.cumplirAnios();  // María López acaba de cumplir 21 años
+
+// Polymorphism over a Persona array
+Persona[] personas = {
+    new Persona("Ana García", 40),
+    new Estudiante("Pedro Martínez", 21, "C202400789"),
+    new Estudiante("Laura Fernández", 19, "D202400321", 88.5)
+};
+for (Persona p : personas) {
+    p.mostrarDetalles(); // dispatches to Estudiante.mostrarDetalles() for students
+}
+```
+
+<Tip>
+`super()` must be the **first statement** inside a constructor body. If you try to execute any other instruction before it the compiler raises `error: call to super must be first statement in constructor`. This rule guarantees the parent's state is fully set up before the child constructor continues.
+</Tip>
+
+## Compile & run
+
+```bash
+cd taller8
+javac ejercicio2/Persona.java ejercicio2/Estudiante.java ejercicio2/PruebaEjercicio2.java
+java ejercicio2.PruebaEjercicio2
+```
+
+Expected output (abridged):
+```
+========== EJERCICIO 2: PERSONA Y ESTUDIANTE ==========
+
+1. Creando una Persona genérica:
+--- Detalles de la Persona ---
+Nombre: Juan García
+Edad: 35 años
+Hola, mi nombre es Juan García
+
+==================================================
+
+2. Creando un Estudiante (heredando de Persona):
+--- Detalles del Estudiante ---
+Nombre: María López
+Edad: 20 años
+Matrícula: A202400123
+Promedio: 0.0
+```

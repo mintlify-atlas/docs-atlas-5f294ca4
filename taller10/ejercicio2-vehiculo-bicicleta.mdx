@@ -1,0 +1,119 @@
+---
+title: "Ejercicio 2: VehiculoT10 and BicicletaT10 — Method Overriding"
+sidebarTitle: "VehiculoT10 & BicicletaT10"
+description: "Override VehiculoT10's moverse() in BicicletaT10 and observe polymorphic behavior when using a VehiculoT10 reference at runtime."
+---
+
+Ejercicio 2 applies the same override-and-dispatch pattern to a vehicle domain. `VehiculoT10` provides a generic `moverse()` implementation, and `BicicletaT10` replaces it with a description that is specific to how a bicycle moves. Assigning a `BicicletaT10` instance to a `VehiculoT10` variable and then calling `moverse()` through that variable confirms that the runtime type — not the variable type — controls which implementation executes.
+
+## Class Hierarchy
+
+```
+VehiculoT10
+└── BicicletaT10
+```
+
+`BicicletaT10` inherits the `marca` field from `VehiculoT10` via `super(marca)` and overrides `moverse()` to reflect bicycle-specific locomotion ("pedaleando").
+
+## Source Code
+
+### `VehiculoT10.java`
+
+```java
+package Taller10;
+
+class VehiculoT10 {
+    String marca;
+
+    public VehiculoT10(String marca) {
+        this.marca = marca;
+    }
+
+    public void moverse() {
+        System.out.println("El vehículo de marca " + marca + " se está moviendo.");
+    }
+}
+```
+
+`VehiculoT10` is the base class. Its `moverse()` prints a generic movement message using the vehicle's brand name. Any concrete vehicle subclass that does not override this method will fall back to this default description.
+
+### `BicicletaT10.java`
+
+```java
+package Taller10;
+
+class BicicletaT10 extends VehiculoT10 {
+    public BicicletaT10(String marca) {
+        super(marca);
+    }
+
+    @Override
+    public void moverse() {
+        System.out.println("La bicicleta de marca " + marca + " se está moviendo pedaleando.");
+    }
+}
+```
+
+`BicicletaT10` extends `VehiculoT10` and overrides `moverse()`. The `@Override` annotation ensures the compiler validates that the method signature matches the one declared in `VehiculoT10`. The body replaces the generic vehicle phrase with one that names the bicycle and its pedalling motion.
+
+## Polymorphic Dispatch Through a Parent-Type Reference
+
+The key moment in `MainEjercicio2T10` is:
+
+```java
+VehiculoT10 v1 = new BicicletaT10("Giant");
+v1.moverse(); // Calls BicicletaT10's moverse(), not VehiculoT10's
+```
+
+Even though `v1` is typed as `VehiculoT10`, the object it holds is a `BicicletaT10`. Java's dynamic dispatch resolves `moverse()` to `BicicletaT10`'s override at runtime.
+
+**Output of that single call:**
+```
+La bicicleta de marca Giant se está moviendo pedaleando.
+```
+
+## Full `main` Method
+
+```java
+package Taller10;
+
+public class MainEjercicio2T10 {
+    public static void main(String[] args) {
+        VehiculoT10 vehiculo = new VehiculoT10("Toyota");
+        BicicletaT10 bicicleta = new BicicletaT10("Specialized");
+
+        System.out.println("\n--- Demostración de Sobrescritura (Ejercicio 2) ---");
+
+        vehiculo.moverse();
+        bicicleta.moverse();
+
+        System.out.println("\n--- Polimorfismo ---");
+        VehiculoT10 v1 = new BicicletaT10("Giant");
+        v1.moverse(); // Llama al moverse de BicicletaT10
+    }
+}
+```
+
+The first block calls `moverse()` directly on each concrete type to show the difference in output. The second block reassigns a `BicicletaT10` to a `VehiculoT10` reference (`v1`) to isolate and highlight the polymorphic dispatch.
+
+## Compile & Run
+
+```bash
+# Compile from the project root
+javac Taller10/VehiculoT10.java Taller10/BicicletaT10.java \
+      Taller10/MainEjercicio2T10.java
+
+# Run
+java Taller10.MainEjercicio2T10
+```
+
+**Full expected output:**
+
+```
+--- Demostración de Sobrescritura (Ejercicio 2) ---
+El vehículo de marca Toyota se está moviendo.
+La bicicleta de marca Specialized se está moviendo pedaleando.
+
+--- Polimorfismo ---
+La bicicleta de marca Giant se está moviendo pedaleando.
+```

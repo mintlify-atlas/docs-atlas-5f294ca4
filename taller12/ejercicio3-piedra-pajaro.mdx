@@ -1,0 +1,136 @@
+---
+title: "Ejercicio 3: Pajaro and Piedra — Selective Interface Implementation"
+sidebarTitle: "Pajaro & Piedra"
+description: "Compare Pajaro (which implements Cantante) with Piedra (which implements Volador), demonstrating selective interface adoption and how interfaces can be used to model surprising or ironic behavior contracts."
+---
+
+Exercise 3 uses a different set of classes in the `Taller12.Ejercicio3` package to explore which objects get which capabilities — and what happens when an interface is implemented in an unexpected or ironic way. `Pajaro` commits to singing but not flying, while `Piedra` commits to the `Volador` contract and uses its implementation to announce the obvious: a rock cannot fly. This contrast highlights the key insight that interfaces are opt-in contracts — each class independently chooses exactly which interfaces to adopt.
+
+## The `Ejercicio3` Package Interfaces
+
+The `Taller12.Ejercicio3` sub-package defines its own local copies of `Volador` and `Cantante`. Their signatures are identical to the top-level `Taller12` versions, but they belong to a different package and are therefore distinct types in the Java type system.
+
+**`Ejercicio3/Volador.java`:**
+
+```java
+package Taller12.Ejercicio3;
+
+public interface Volador {
+    void volar();
+}
+```
+
+**`Ejercicio3/Cantante.java`:**
+
+```java
+package Taller12.Ejercicio3;
+
+public interface Cantante {
+    void cantar();
+}
+```
+
+## `Pajaro` — Implements `Cantante`, Not `Volador`
+
+`Pajaro` declares `implements Cantante`, meaning it commits to providing a `cantar()` method. In this exercise the class body is a stub — the constructor sets the name but `cantar()` has not yet been given a body, making this a starting point for further development:
+
+```java
+package Taller12.Ejercicio3;
+
+public class Pajaro implements Cantante {
+    private String nombre;
+
+    public Pajaro(String nombre) {
+        this.nombre = nombre;
+    }
+}
+```
+
+<Note>
+Because `Pajaro` declares `implements Cantante` but provides no concrete `cantar()` method, this class will not compile unless it is either declared `abstract` or given a `cantar()` implementation. The stub as-written represents unfinished work — a bird that can sing in theory, but whose singing behavior still needs to be coded.
+</Note>
+
+A completed version would look like:
+
+```java
+@Override
+public void cantar() {
+    System.out.println("El pájaro " + nombre + " está cantando.");
+}
+```
+
+## `Piedra` — Implements `Volador` Ironically
+
+`Piedra` takes the `Volador` interface and provides an implementation that honestly describes what a rock does when asked to fly:
+
+```java
+package Taller12.Ejercicio3;
+
+public class Piedra implements Volador {
+    private String nombre;
+
+    public Piedra(String nombre) {
+        this.nombre = nombre;
+    }
+
+    @Override
+    public void volar() {
+        System.out.println("La piedra " + nombre + " no puede volar.");
+    }
+}
+```
+
+The implementation satisfies the compiler — `Piedra` is a valid `Volador` in the type system — but the output makes the absurdity explicit. This is a deliberate teaching technique: the interface contract says "you can fly," but the implementation is free to define what "flying" means for this class.
+
+## `Main3.java` — Running the Exercise
+
+The entry point creates a `Piedra` and calls `volar()` on it:
+
+```java
+package Taller12.Ejercicio3;
+
+public class Main3 {
+    public static void main(String[] args) {
+        Piedra piedra = new Piedra("Roca grande");
+        piedra.volar();
+    }
+}
+```
+
+**Expected output:**
+
+```
+La piedra Roca grande no puede volar.
+```
+
+## Design Insight: Interfaces Are Opt-In Contracts
+
+The contrast between `Pajaro` and `Piedra` makes a precise point about interface design:
+
+- **`Pajaro`** is the class you would naturally expect to implement `Volador` (birds fly), yet it doesn't — it only implements `Cantante`. A class is never forced to adopt an interface just because the domain suggests it might.
+- **`Piedra`** is the class you would never expect to implement `Volador` (rocks don't fly), yet it does — and its implementation tells the truth about that fact.
+
+Adding a new interface to one class has zero effect on any other class. If a future `Aguila` class is added and implements both `Volador` and `Cantante`, `Pajaro` and `Piedra` are completely unaffected. Interfaces scale without coupling.
+
+<Note>
+Note that `Taller12/Ejercicio3/` defines its own local `Volador` and `Cantante` interfaces separate from the top-level `Taller12` package. This is valid Java but keep packages organized to avoid confusion in larger projects.
+</Note>
+
+## Compile & Run
+
+The `Ejercicio3` sub-package must be compiled separately from the top-level `Taller12` classes. Run all commands from the project root (the directory that contains the `Taller12/` folder):
+
+```bash
+# Compile only the Ejercicio3 sub-package
+javac Taller12/Ejercicio3/Volador.java \
+      Taller12/Ejercicio3/Cantante.java \
+      Taller12/Ejercicio3/Pajaro.java \
+      Taller12/Ejercicio3/Piedra.java \
+      Taller12/Ejercicio3/Main3.java
+
+# Or compile all files in the sub-package at once
+javac Taller12/Ejercicio3/*.java
+
+# Run
+java Taller12.Ejercicio3.Main3
+```

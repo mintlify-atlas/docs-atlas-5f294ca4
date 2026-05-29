@@ -1,0 +1,46 @@
+---
+title: "Taller 7: Access Modifiers and Encapsulation in Java"
+sidebarTitle: "Overview"
+description: "Overview of Taller 7 — three exercises that teach public, private, and static access modifiers with real-world models like Empleado and CuentaBancaria."
+---
+
+Taller 7 introduces access modifiers — the mechanism Java uses to control which parts of your code can access class members. Starting from a simple employee model with mixed `public` and `private` fields, the exercises progress through a fully encapsulated bank account and conclude with a stateless utility class whose methods never require an object instance.
+
+## Exercises
+
+<CardGroup cols={3}>
+  <Card title="Ejercicio 1 — Empleado" icon="user-tie" href="/taller7/ejercicio1-empleado">
+    Explore `public` vs `private` fields, the getter/setter pattern, and salary validation logic in a concrete employee model.
+  </Card>
+  <Card title="Ejercicio 2 — CuentaBancaria" icon="building-columns" href="/taller7/ejercicio2-cuenta-bancaria">
+    Protect sensitive financial data with `private` fields, validated deposit and withdrawal methods, and peer-to-peer transfers.
+  </Card>
+  <Card title="Ejercicio 3 — Utilidades" icon="calculator" href="/taller7/ejercicio3-utilidades">
+    Build a static utility class whose arithmetic, rounding, prime-checking, and factorial methods need no instantiation.
+  </Card>
+</CardGroup>
+
+## Key Concepts Covered
+
+| Concept | Description |
+|---------|-------------|
+| `public` | Members accessible from any class |
+| `private` | Members accessible only within the declaring class |
+| Getter / Setter pattern | Controlled read and write access to private fields |
+| Input validation | Setters and operation methods reject invalid data before mutating state |
+| `static` methods | Utility methods that belong to the class, not to any instance |
+
+## Compiling the Exercises
+
+Run the following commands from the repository root to compile each exercise independently:
+
+```bash
+# Ejercicio 1 — Empleado
+javac Taller7/ejercicio_1/Empleado.java Taller7/ejercicio_1/PruebaEjercicio1.java
+
+# Ejercicio 2 — CuentaBancaria
+javac Taller7/ejercicio_2/CuentaBancaria.java Taller7/ejercicio_2/PruebaEjercicio2.java
+
+# Ejercicio 3 — Utilidades
+javac Taller7/ejercicio_3/Utilidades.java Taller7/ejercicio_3/PruebaEjercicio3.java
+```

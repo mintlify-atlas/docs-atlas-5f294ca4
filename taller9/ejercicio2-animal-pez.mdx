@@ -1,0 +1,110 @@
+---
+title: "Ejercicio 2: Animal and Pez — Inheritance with super"
+sidebarTitle: "Animal & Pez"
+description: "Extend Animal with Pez using super() and demonstrate how subclass-specific fields combine with inherited parent behavior."
+---
+
+Ejercicio 2 reinforces the same `super` patterns from Ejercicio 1 in a different domain: the animal kingdom. `Animal` stores and displays a species name, while `Pez` specialises it as a fish by adding information about the type of water it lives in. The subclass constructor passes `especie` up to `Animal` via `super(especie)`, and the overridden `mostrarEspecie()` method layers `Pez`'s own output on top of the parent's output by calling `super.mostrarEspecie()` first. The result is a clean two-level display built without duplicating any logic from the parent.
+
+---
+
+## The `Animal` Class
+
+`Animal` is the base class. It holds a single `especie` field and exposes a `mostrarEspecie()` method that prints it.
+
+```java title="Taller9/Animal.java"
+package Taller9;
+
+public class Animal {
+    String especie;
+
+    public Animal(String especie) {
+        this.especie = especie;
+    }
+
+    public void mostrarEspecie() {
+        System.out.println("Especie: " + especie);
+    }
+}
+```
+
+---
+
+## The `Pez` Class
+
+`Pez` extends `Animal` and adds the `tipoDeAgua` field. Its constructor accepts both `especie` and `tipoDeAgua`, forwarding `especie` to `Animal`'s constructor with `super(especie)`. The overridden `mostrarEspecie()` calls `super.mostrarEspecie()` to print the inherited species line, then appends the water-type line.
+
+```java title="Taller9/Pez.java"
+package Taller9;
+
+public class Pez extends Animal {
+    String tipoDeAgua;
+
+    public Pez(String especie, String tipoDeAgua) {
+        super(especie); // Llama al constructor de la clase base Animal
+        this.tipoDeAgua = tipoDeAgua;
+    }
+
+    @Override
+    public void mostrarEspecie() {
+        super.mostrarEspecie(); // Llama al método mostrarEspecie de la clase base Animal
+        System.out.println("Tipo de Agua: " + tipoDeAgua);
+    }
+}
+```
+
+### Execution flow for `pez1.mostrarEspecie()`
+
+```
+Pez.mostrarEspecie()
+  └─► super.mostrarEspecie()   ← runs Animal.mostrarEspecie()
+        prints "Especie: Salmón"
+  └─► prints "Tipo de Agua: Agua Dulce"
+```
+
+<Tip>
+  Notice the parallel structure with Ejercicio 1: `Pez`→`Animal` mirrors `Empleado`→`Persona` exactly. This is the standard pattern for cooperative method overriding in Java — call `super.method()` first, then extend the output.
+</Tip>
+
+---
+
+## Main Program
+
+```java title="Taller9/MainEjercicio2.java"
+package Taller9;
+
+public class MainEjercicio2 {
+    public static void main(String[] args) {
+        Pez pez1 = new Pez("Salmón", "Agua Dulce");
+        System.out.println("Detalles del Pez:");
+        pez1.mostrarEspecie();
+
+        System.out.println("\nDetalles del Animal (a través de Pez):");
+        Animal animal1 = new Animal("León");
+        animal1.mostrarEspecie();
+    }
+}
+```
+
+### Expected output
+
+```
+Detalles del Pez:
+Especie: Salmón
+Tipo de Agua: Agua Dulce
+
+Detalles del Animal (a través de Pez):
+Especie: León
+```
+
+The second block creates a plain `Animal` directly, so `mostrarEspecie()` prints only the species line — no water-type output because `Pez`'s override is not involved.
+
+---
+
+## Compile & Run
+
+```bash
+# From the project root (parent of the Taller9/ directory)
+javac Taller9/Animal.java Taller9/Pez.java Taller9/MainEjercicio2.java
+java Taller9.MainEjercicio2
+```

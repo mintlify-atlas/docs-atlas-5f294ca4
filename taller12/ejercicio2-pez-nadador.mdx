@@ -1,0 +1,122 @@
+---
+title: "Ejercicio 2: Pez Implementing Nadador and Respirador"
+sidebarTitle: "Pez & Nadador"
+description: "Model a Pez class that implements both Nadador and Respirador interfaces, showing how unrelated behaviors can be combined on one class."
+---
+
+Ejercicio 2 repeats the multiple-interface pattern from Ejercicio 1, this time in an entirely different domain — aquatic life. Two interfaces, `Nadador` and `Respirador`, capture the distinct capabilities of a fish: moving through water and extracting oxygen from it. The `Pez` class implements both, demonstrating that the technique scales naturally to any set of behaviors you want to model.
+
+## The Interfaces
+
+**`Nadador.java`** — anything capable of swimming:
+
+```java
+package Taller12;
+
+public interface Nadador {
+    void nadar();
+}
+```
+
+**`Respirador.java`** — anything capable of breathing:
+
+```java
+package Taller12;
+
+public interface Respirador {
+    void respirar();
+}
+```
+
+These two interfaces are completely independent of each other — and of `Volador` and `Cantante` from Ejercicio 1. There is no shared hierarchy; they are simply separate contracts.
+
+## The `Pez` Class
+
+`Pez` stores `nombre` (name) and `tipo` (species/type) and provides concrete implementations for both interface methods:
+
+```java
+package Taller12;
+
+public class Pez implements Nadador, Respirador {
+    private String nombre;
+    private String tipo;
+
+    public Pez(String nombre, String tipo) {
+        this.nombre = nombre;
+        this.tipo = tipo;
+    }
+
+    @Override
+    public void nadar() {
+        System.out.println("El pez " + nombre + " (" + tipo + ") está nadando en el agua.");
+    }
+
+    @Override
+    public void respirar() {
+        System.out.println("El pez " + nombre + " está respirando a través de sus branquias.");
+    }
+}
+```
+
+Notice that `nadar()` includes both the name and the type in its output (matching the `volar()` pattern in `Ave`), while `respirar()` uses only the name — the implementation detail that differentiates a fish's respiration from, say, a land animal's.
+
+## Usage — `Ejercicio2.java`
+
+```java
+package Taller12;
+
+public class Ejercicio2 {
+    public static void main(String[] args) {
+        Pez pez = new Pez("Nemo", "Pez Payaso");
+        pez.nadar();
+        pez.respirar();
+    }
+}
+```
+
+**Expected output:**
+
+```
+El pez Nemo (Pez Payaso) está nadando en el agua.
+El pez Nemo está respirando a través de sus branquias.
+```
+
+## Multiple Views of the Same Object
+
+Just as `Ave` could be referenced as either a `Volador` or a `Cantante`, a `Pez` object can be referenced through either interface type, exposing only that interface's methods to the caller:
+
+```java
+// Treat the fish purely as something that swims
+Nadador nadador = new Pez("Nemo", "Pez Payaso");
+nadador.nadar();
+
+// Treat the same fish purely as something that breathes
+Respirador respirador = new Pez("Nemo", "Pez Payaso");
+respirador.respirar();
+```
+
+This is useful when writing general-purpose code: a method that processes a list of `Nadador` objects doesn't need to know or care whether each element is a `Pez`, a future `Delfin`, or any other swimming class.
+
+## Comparison with Ejercicio 1
+
+| Aspect | Ejercicio 1 (`Ave`) | Ejercicio 2 (`Pez`) |
+|---|---|---|
+| Interfaces implemented | `Volador`, `Cantante` | `Nadador`, `Respirador` |
+| Fields | `nombre`, `especie` | `nombre`, `tipo` |
+| Domain | Avian / aerial | Aquatic |
+| Pattern | `class X implements A, B` | `class X implements A, B` |
+
+Both exercises follow the exact same structural pattern — define two independent interfaces, then write a class that implements both. The domain changes, but the Java mechanism is identical, reinforcing that multiple interface implementation is a general-purpose tool rather than a special case.
+
+## Compile & Run
+
+```bash
+# From the project root
+javac Taller12/Nadador.java Taller12/Respirador.java Taller12/Pez.java Taller12/Ejercicio2.java
+
+# Or compile all files in the package at once
+javac Taller12/*.java
+
+# Run
+java Taller12.Ejercicio2
+```

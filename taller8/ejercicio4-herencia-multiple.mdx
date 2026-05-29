@@ -1,0 +1,298 @@
+---
+title: "Ejercicio 4: Why Java Forbids Multiple Class Inheritance"
+sidebarTitle: "Multiple Inheritance"
+description: "Understand why Java prohibits extending multiple classes, see the compiler error, and learn the correct workaround using interfaces."
+---
+
+Java intentionally prevents a class from extending more than one class to avoid the *diamond problem* — the ambiguity that arises when two parent classes define the same method and the compiler cannot decide which version to inherit. This exercise presents two distinct failure modes side by side with their correct alternatives: trying to list two classes after `extends`, and trying to access `private` fields from a subclass directly.
+
+## ❌ Broken example 1 — multiple class inheritance
+
+`ClaseA` and `ClaseB` are two independent classes, each with one method. `ClaseC` attempts to inherit from both using a comma-separated `extends` clause.
+
+### ClaseA and ClaseB
+
+```java
+package ejercicio4;
+/** Primera clase base (Clase A) */
+public class ClaseA {
+    public void metodoA() {
+        System.out.println("Método de Clase A");
+    }
+}
+```
+
+```java
+package ejercicio4;
+/** Segunda clase base (Clase B) */
+public class ClaseB {
+    public void metodoB() {
+        System.out.println("Método de Clase B");
+    }
+}
+```
+
+### ClaseC — the invalid attempt ❌
+
+```java
+package ejercicio4;
+/**
+ * INCORRECTO: Intento de heredar de dos clases
+ * ESTO NO COMPILA - GENERA ERROR DE COMPILACIÓN
+ */
+public class ClaseC extends ClaseA, ClaseB {  // ❌ ERROR
+
+    public void metodoC() {
+        System.out.println("Método de Clase C");
+    }
+}
+```
+
+<Warning>
+Attempting to compile `ClaseC.java` will produce: `error: '{' expected` — the compiler rejects the comma-separated `extends` syntax entirely. Java's grammar only allows a single class name after `extends`.
+</Warning>
+
+## ❌ Broken example 2 — accessing private parent fields directly
+
+Even within a valid single-inheritance relationship, a subclass cannot reach into `private` fields of its parent. `Vehiculo` (ejercicio 4 version) declares `marca`, `modelo`, and `ano` as `private`, and only `velocidadMaxima` as `protected`.
+
+### Vehiculo (ejercicio 4)
+
+```java
+package ejercicio4;
+
+/**
+ * Clase base con atributo privado
+ */
+public class Vehiculo {
+
+    // Atributos PRIVADOS (no accesibles desde clases derivadas)
+    private String marca;
+    private String modelo;
+    private int ano;
+
+    // Atributo PROTEGIDO (accesible desde clases derivadas)
+    protected int velocidadMaxima;
+
+    /**
+     * Constructor
+     */
+    public Vehiculo(String marca, String modelo, int ano, int velocidadMaxima) {
+        this.marca = marca;
+        this.modelo = modelo;
+        this.ano = ano;
+        this.velocidadMaxima = velocidadMaxima;
+    }
+
+    // Getters para acceder a los atributos privados
+    public String getMarca()  { return marca; }
+    public String getModelo() { return modelo; }
+    public int getAno()       { return ano; }
+}
+```
+
+### Coche_INCORRECTO — direct access to private fields ❌
+
+```java
+package ejercicio4;
+
+/**
+ * INCORRECTO: Intenta acceder a atributos privados
+ * ❌ ESTO NO COMPILA - GENERA ERROR DE COMPILACIÓN
+ */
+public class Coche_INCORRECTO extends Vehiculo {
+
+    private int numeroDePuertas;
+
+    public Coche_INCORRECTO(String marca, String modelo, int ano,
+                            int velocidadMaxima, int numeroDePuertas) {
+        super(marca, modelo, ano, velocidadMaxima);
+        this.numeroDePuertas = numeroDePuertas;
+    }
+
+    /**
+     * INCORRECTO: Intentar acceder directamente a 'marca'
+     */
+    public void mostrarMarca() {
+        // ❌ ERROR DE COMPILACIÓN: marca tiene acceso privado
+        System.out.println("Marca: " + marca);  // ERROR aquí
+    }
+
+    /**
+     * INCORRECTO: Intentar acceder directamente a 'modelo'
+     */
+    public void mostrarModelo() {
+        // ❌ ERROR DE COMPILACIÓN: modelo tiene acceso privado
+        System.out.println("Modelo: " + modelo);  // ERROR aquí
+    }
+
+    /**
+     * INCORRECTO: Intentar acceder directamente a 'ano'
+     */
+    public void mostrarAno() {
+        // ❌ ERROR DE COMPILACIÓN: ano tiene acceso privado
+        System.out.println("Año: " + ano);  // ERROR aquí
+    }
+}
+```
+
+The compiler message for each flagged line is:
+```
+error: marca has private access in Vehiculo
+```
+
+## ✅ Correct example 2 — use getters for private fields
+
+`Coche_CORRECTO` extends the same `Vehiculo` parent but calls the public getter methods (`getMarca()`, `getModelo()`, `getAno()`) instead of touching the private fields directly. The `protected` field `velocidadMaxima` can still be used by name.
+
+```java
+package ejercicio4;
+
+/**
+ * CORRECTO: Usar getters para acceder a atributos privados
+ * ✅ ESTO SÍ COMPILA
+ */
+public class Coche_CORRECTO extends Vehiculo {
+
+    private int numeroDePuertas;
+
+    public Coche_CORRECTO(String marca, String modelo, int ano,
+                          int velocidadMaxima, int numeroDePuertas) {
+        super(marca, modelo, ano, velocidadMaxima);
+        this.numeroDePuertas = numeroDePuertas;
+    }
+
+    /** CORRECTO: Usar getter para acceder a marca */
+    public void mostrarMarca() {
+        System.out.println("Marca: " + getMarca());   // ✅ USA GETTER
+    }
+
+    /** CORRECTO: Usar getter para acceder a modelo */
+    public void mostrarModelo() {
+        System.out.println("Modelo: " + getModelo()); // ✅ USA GETTER
+    }
+
+    /** CORRECTO: Usar getter para acceder a año */
+    public void mostrarAno() {
+        System.out.println("Año: " + getAno());       // ✅ USA GETTER
+    }
+
+    /** CORRECTO: Acceder a atributo protegido de la clase base */
+    public void mostrarVelocidad() {
+        System.out.println("Velocidad Máxima: " + velocidadMaxima); // ✅ protected
+    }
+
+    /** Mostrar toda la información */
+    public void mostrarInfo() {
+        System.out.println("--- Información del Coche ---");
+        System.out.println("Marca: " + getMarca());
+        System.out.println("Modelo: " + getModelo());
+        System.out.println("Año: " + getAno());
+        System.out.println("Velocidad Máxima: " + velocidadMaxima);
+        System.out.println("Número de Puertas: " + numeroDePuertas);
+    }
+}
+```
+
+## ✅ Correct example 1 — extend one class, implement an interface
+
+The fix for wanting behaviour from two sources is to extend one class and *implement* one or more interfaces. `InterfazB` declares `metodoB()` as a contract, and `ClaseC_CORRECTO` fulfils that contract while also inheriting from `ClaseA`.
+
+### InterfazB
+
+```java
+package ejercicio4;
+/** Interfaz para evitar herencia múltiple */
+public interface InterfazB {
+    void metodoB();
+}
+```
+
+### ClaseC_CORRECTO ✅
+
+```java
+package ejercicio4;
+
+/**
+ * CORRECTO: Usar interfaces en lugar de herencia múltiple
+ * ✅ ESTO SÍ COMPILA
+ */
+public class ClaseC_CORRECTO extends ClaseA implements InterfazB {
+
+    @Override
+    public void metodoB() {
+        System.out.println("Método de Clase B implementado en C");
+    }
+
+    public void metodoC() {
+        System.out.println("Método de Clase C");
+    }
+}
+```
+
+`ClaseC_CORRECTO` now has access to all three methods — `metodoA()` (inherited), `metodoB()` (implemented), and `metodoC()` (own) — without violating Java's single-inheritance rule.
+
+## extends vs. implements — comparison
+
+| | `extends` | `implements` |
+|---|---|---|
+| **Target** | A class | An interface (or multiple interfaces) |
+| **How many at once?** | **One only** | Multiple, comma-separated |
+| **Inherits implementation?** | Yes — fields and method bodies | No — only the method contract (unless `default` methods are used) |
+| **Compiler enforces?** | `error: '{' expected` if you list two classes | Compiler verifies all interface methods are implemented |
+| **Example** | `class Coche extends Vehiculo` | `class ClaseC_CORRECTO extends ClaseA implements InterfazB` |
+
+## Access modifier cheat-sheet
+
+The `PruebaEjercicio4` test also prints this table at runtime, showing which modifiers allow access from a subclass:
+
+| Modifier | Same class | Derived class | Same package | Other |
+|---|---|---|---|---|
+| `public` | ✅ | ✅ | ✅ | ✅ |
+| `protected` | ✅ | ✅ | ✅ | ❌ |
+| `package-private` (no modifier) | ✅ | ❌ | ✅ | ❌ |
+| `private` | ✅ | ❌ | ❌ | ❌ |
+
+## Compile & run
+
+Only the valid source files should be compiled. `ClaseC.java` and `Coche_INCORRECTO.java` are intentionally broken and must be excluded.
+
+```bash
+cd taller8
+javac ejercicio4/ClaseA.java \
+      ejercicio4/ClaseB.java \
+      ejercicio4/InterfazB.java \
+      ejercicio4/ClaseC_CORRECTO.java \
+      ejercicio4/Vehiculo.java \
+      ejercicio4/Coche_CORRECTO.java \
+      ejercicio4/PruebaEjercicio4.java
+java ejercicio4.PruebaEjercicio4
+```
+
+Expected output (abridged):
+```
+========== EJERCICIO 4: USO INCORRECTO DE HERENCIA ==========
+
+--- SOLUCIÓN 1: USANDO INTERFACES ---
+
+❌ INCORRECTO: class C extends A, B { }
+✅ CORRECTO:   class C extends A implements I { }
+
+Método de Clase A
+Método de Clase B implementado en C
+Método de Clase C
+
+==================================================
+
+--- SOLUCIÓN 2: USANDO GETTERS ---
+
+❌ INCORRECTO: System.out.println(marca);
+✅ CORRECTO:   System.out.println(getMarca());
+
+--- Información del Coche ---
+Marca: BMW
+Modelo: X5
+Año: 2024
+Velocidad Máxima: 220
+Número de Puertas: 4
+```

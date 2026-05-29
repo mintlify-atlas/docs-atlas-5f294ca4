@@ -1,0 +1,285 @@
+---
+title: "Ejercicio 3: Utilidades — Static Utility Class Pattern in Java"
+sidebarTitle: "Utilidades"
+description: "Implement a Java static utility class with arithmetic, rounding, prime checking, and factorial methods — no instantiation required."
+---
+
+The `Utilidades` class is a pure utility class — all methods are `static`, and a `private` constructor prevents any caller from creating an instance. This pattern groups related mathematical operations under one namespace while making it crystal-clear that the class carries no per-object state. Any code in the project can call `Utilidades.suma(...)` or `Utilidades.factorial(...)` without first constructing an object.
+
+## `PRECISION` Constant
+
+```java
+public static final double PRECISION = 1e-10;
+```
+
+`PRECISION` is used internally by `dividir()` to detect a near-zero divisor with `Math.abs(divisor) < PRECISION`, guarding against floating-point representations of zero.
+
+## Static Methods
+
+| Signature | Returns | Description |
+|-----------|---------|-------------|
+| `suma(double a, double b)` | `double` | Returns `a + b` |
+| `resta(double a, double b)` | `double` | Returns `a - b` |
+| `multiplicar(double a, double b)` | `double` | Returns `a * b` |
+| `dividir(double dividendo, double divisor)` | `double` | Returns `dividendo / divisor`; prints an error and returns `0` when `divisor` is effectively zero |
+| `potencia(double base, double exponente)` | `double` | Returns `Math.pow(base, exponente)` |
+| `raizCuadrada(double numero)` | `double` | Returns `Math.sqrt(numero)`; prints an error and returns `-1` for negative input |
+| `valorAbsoluto(double numero)` | `double` | Returns `Math.abs(numero)` |
+| `maximo(double a, double b)` | `double` | Returns the larger of `a` and `b` via `Math.max()` |
+| `minimo(double a, double b)` | `double` | Returns the smaller of `a` and `b` via `Math.min()` |
+| `redondear(double numero, int decimales)` | `double` | Rounds `numero` to the specified number of decimal places |
+| `promedio(double... numeros)` | `double` | Varargs average; returns `0` for an empty argument list |
+| `esPar(int numero)` | `boolean` | Returns `true` if `numero % 2 == 0` |
+| `esPrimo(int numero)` | `boolean` | Returns `true` if `numero` has no divisors between 2 and √numero |
+| `factorial(int numero)` | `long` | Iterative factorial; returns `1` for 0 and 1; prints an error and returns `-1` for negative input |
+
+## Full Source — `Utilidades.java`
+
+```java
+package Taller7.ejercicio_3;
+
+/**
+ * Clase Utilidades que proporciona métodos públicos estáticos
+ * para realizar operaciones matemáticas básicas y avanzadas
+ *
+ * Esta clase es un ejemplo de método de utilidad pública (Utility Class)
+ * que agrupa funcionalidades que pueden ser usadas desde cualquier lugar
+ */
+public class Utilidades {
+
+    // Constante pública para precisión decimal
+    public static final double PRECISION = 1e-10;
+
+    // Nota: No instanciamos Utilidades, solo usamos métodos estáticos
+    private Utilidades() {
+        // Evita que se cree instancia de esta clase
+    }
+
+    /**
+     * Método público estático para sumar dos números
+     * @param a Primer número
+     * @param b Segundo número
+     * @return La suma de a + b
+     */
+    public static double suma(double a, double b) {
+        return a + b;
+    }
+
+    /**
+     * Método público estático para restar dos números
+     * @param a Minuendo
+     * @param b Sustraendo
+     * @return La resta de a - b
+     */
+    public static double resta(double a, double b) {
+        return a - b;
+    }
+
+    /**
+     * Método público estático para multiplicar dos números
+     * @param a Primer factor
+     * @param b Segundo factor
+     * @return El producto de a * b
+     */
+    public static double multiplicar(double a, double b) {
+        return a * b;
+    }
+
+    /**
+     * Método público estático para dividir dos números
+     * ✅ Incluye validación: no permite división por cero
+     * @param dividendo El número a dividir
+     * @param divisor El número que divide
+     * @return El resultado de dividendo / divisor
+     */
+    public static double dividir(double dividendo, double divisor) {
+        if (Math.abs(divisor) < PRECISION) {
+            System.out.println("❌ Error: No se puede dividir por cero.");
+            return 0;
+        }
+        return dividendo / divisor;
+    }
+
+    /**
+     * Método público estático para calcular potencia
+     * @param base La base
+     * @param exponente El exponente
+     * @return base elevado a la potencia exponente
+     */
+    public static double potencia(double base, double exponente) {
+        return Math.pow(base, exponente);
+    }
+
+    /**
+     * Método público estático para calcular raíz cuadrada
+     * ✅ Incluye validación: no permite raíz de negativos
+     * @param numero El número
+     * @return La raíz cuadrada de número
+     */
+    public static double raizCuadrada(double numero) {
+        if (numero < 0) {
+            System.out.println("❌ Error: No se puede calcular raíz de número negativo.");
+            return -1;
+        }
+        return Math.sqrt(numero);
+    }
+
+    /**
+     * Método público estático para calcular valor absoluto
+     * @param numero El número
+     * @return El valor absoluto de número
+     */
+    public static double valorAbsoluto(double numero) {
+        return Math.abs(numero);
+    }
+
+    /**
+     * Método público estático para encontrar el máximo entre dos números
+     * @param a Primer número
+     * @param b Segundo número
+     * @return El mayor de los dos números
+     */
+    public static double maximo(double a, double b) {
+        return Math.max(a, b);
+    }
+
+    /**
+     * Método público estático para encontrar el mínimo entre dos números
+     * @param a Primer número
+     * @param b Segundo número
+     * @return El menor de los dos números
+     */
+    public static double minimo(double a, double b) {
+        return Math.min(a, b);
+    }
+
+    /**
+     * Método público estático para redondear un número
+     * @param numero El número a redondear
+     * @param decimales Número de decimales
+     * @return El número redondeado
+     */
+    public static double redondear(double numero, int decimales) {
+        double factor = Math.pow(10, decimales);
+        return Math.round(numero * factor) / factor;
+    }
+
+    /**
+     * Método público estático para calcular el promedio de números
+     * @param numeros Variable cantidad de números
+     * @return El promedio
+     */
+    public static double promedio(double... numeros) {
+        if (numeros.length == 0) {
+            return 0;
+        }
+        double suma = 0;
+        for (double num : numeros) {
+            suma += num;
+        }
+        return suma / numeros.length;
+    }
+
+    /**
+     * Método público estático para verificar si un número es par
+     * @param numero El número
+     * @return true si es par, false si es impar
+     */
+    public static boolean esPar(int numero) {
+        return numero % 2 == 0;
+    }
+
+    /**
+     * Método público estático para verificar si un número es primo
+     * @param numero El número
+     * @return true si es primo, false si no lo es
+     */
+    public static boolean esPrimo(int numero) {
+        if (numero < 2) {
+            return false;
+        }
+        for (int i = 2; i <= Math.sqrt(numero); i++) {
+            if (numero % i == 0) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Método público estático para calcular factorial
+     * @param numero El número
+     * @return El factorial de número
+     */
+    public static long factorial(int numero) {
+        if (numero < 0) {
+            System.out.println("❌ Error: No se puede calcular factorial de negativo.");
+            return -1;
+        }
+        if (numero == 0 || numero == 1) {
+            return 1;
+        }
+        long resultado = 1;
+        for (int i = 2; i <= numero; i++) {
+            resultado *= i;
+        }
+        return resultado;
+    }
+}
+```
+
+## Usage Example — `PruebaEjercicio3.java`
+
+All methods are called directly on the class name — no `new Utilidades()` is needed or possible.
+
+```java
+// Basic arithmetic
+double a = 20.0, b = 5.0;
+System.out.println(Utilidades.suma(a, b));           // 25.0
+System.out.println(Utilidades.resta(a, b));          // 15.0
+System.out.println(Utilidades.multiplicar(a, b));    // 100.0
+System.out.println(Utilidades.dividir(a, b));        // 4.0
+
+// Advanced math
+System.out.println(Utilidades.potencia(2, 5));       // 32.0
+System.out.println(Utilidades.raizCuadrada(16));     // 4.0
+System.out.println(Utilidades.valorAbsoluto(-15));   // 15.0
+System.out.println(Utilidades.maximo(10, 25));       // 25.0
+System.out.println(Utilidades.minimo(10, 25));       // 10.0
+
+// Guard rails
+Utilidades.dividir(10, 0);          // ❌ Error: No se puede dividir por cero.
+Utilidades.raizCuadrada(-9);        // ❌ Error: No se puede calcular raíz de número negativo.
+
+// Rounding and statistics
+System.out.println(Utilidades.redondear(3.14159265359, 2));        // 3.14
+System.out.println(Utilidades.redondear(3.14159265359, 4));        // 3.1416
+System.out.println(Utilidades.promedio(10, 20, 30));               // 20.0
+System.out.println(Utilidades.promedio(85.5, 90, 78, 92.5));       // 86.5
+
+// Boolean predicates
+System.out.println(Utilidades.esPar(10));    // true
+System.out.println(Utilidades.esPar(15));    // false
+System.out.println(Utilidades.esPrimo(7));   // true
+System.out.println(Utilidades.esPrimo(10));  // false
+
+// Factorial
+System.out.println(Utilidades.factorial(5));   // 120
+System.out.println(Utilidades.factorial(10));  // 3628800
+
+// Composing calls — circle area: π × r²
+double radio = 5.0;
+double area = Utilidades.multiplicar(Utilidades.potencia(radio, 2), Math.PI);
+System.out.println("Área: " + String.format("%.2f", area));  // 78.54
+```
+
+<Note>
+`PRECISION` (`1e-10`) is a `public static final` constant, so you can reference it directly as `Utilidades.PRECISION` in your own code. The `private` constructor means `new Utilidades()` will not compile — the class is designed exclusively for its static API.
+</Note>
+
+## Compile & Run
+
+```bash
+javac Taller7/ejercicio_3/Utilidades.java Taller7/ejercicio_3/PruebaEjercicio3.java
+java Taller7.ejercicio_3.PruebaEjercicio3
+```

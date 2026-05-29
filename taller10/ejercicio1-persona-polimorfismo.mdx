@@ -1,0 +1,165 @@
+---
+title: "Ejercicio 1: PersonaT10, EstudianteT10, and ProfesorT10 — Polymorphism"
+sidebarTitle: "Polymorphism Demo"
+description: "Demonstrate runtime polymorphism: PersonaT10 references holding EstudianteT10 and ProfesorT10 objects call the correct overridden presentarse() method."
+---
+
+Ejercicio 1 builds the canonical polymorphism example: a parent class `PersonaT10` defines a `presentarse()` method, and two subclasses — `EstudianteT10` and `ProfesorT10` — each override it with role-specific output. When either subclass instance is assigned to a `PersonaT10` reference, calling `presentarse()` through that reference still reaches the subclass implementation, demonstrating that Java's method dispatch is governed by the runtime type of the object, not by the compile-time type of the variable.
+
+## Class Hierarchy
+
+```
+PersonaT10
+├── EstudianteT10   (adds: carrera)
+└── ProfesorT10     (adds: especialidad)
+```
+
+Each subclass calls `super(nombre)` to initialise the inherited field and then overrides `presentarse()` to include its own additional data.
+
+## Source Code
+
+### `PersonaT10.java`
+
+```java
+package Taller10;
+
+class PersonaT10 {
+    String nombre;
+
+    public PersonaT10(String nombre) {
+        this.nombre = nombre;
+    }
+
+    public void presentarse() {
+        System.out.println("Hola, soy " + nombre + ".");
+    }
+}
+```
+
+`PersonaT10` is the base class. Its `presentarse()` prints only the person's name. Any subclass that does not override this method inherits this default behaviour.
+
+### `EstudianteT10.java`
+
+```java
+package Taller10;
+
+class EstudianteT10 extends PersonaT10 {
+    String carrera;
+
+    public EstudianteT10(String nombre, String carrera) {
+        super(nombre);
+        this.carrera = carrera;
+    }
+
+    @Override
+    public void presentarse() {
+        System.out.println("Hola, soy " + nombre + " y estudio " + carrera + ".");
+    }
+}
+```
+
+`EstudianteT10` extends `PersonaT10` and adds the `carrera` field. The `@Override` annotation confirms to the compiler that `presentarse()` matches a method signature already declared in the parent class. The overridden body appends the student's field of study to the introduction.
+
+### `ProfesorT10.java`
+
+```java
+package Taller10;
+
+class ProfesorT10 extends PersonaT10 {
+    String especialidad;
+
+    public ProfesorT10(String nombre, String especialidad) {
+        super(nombre);
+        this.especialidad = especialidad;
+    }
+
+    @Override
+    public void presentarse() {
+        System.out.println("Hola, soy el profesor " + nombre + " y mi especialidad es " + especialidad + ".");
+    }
+}
+```
+
+`ProfesorT10` follows the same pattern with a different additional field (`especialidad`) and a different phrase structure that identifies the person as a professor.
+
+## Polymorphism in Action
+
+The heart of the exercise is in `MainEjercicio1T10`:
+
+```java
+PersonaT10 p1 = new EstudianteT10("Pedro", "Diseño Gráfico");
+PersonaT10 p2 = new ProfesorT10("Laura", "Física");
+
+p1.presentarse(); // calls EstudianteT10's version
+p2.presentarse(); // calls ProfesorT10's version
+```
+
+**Expected output:**
+
+```
+Hola, soy Pedro y estudio Diseño Gráfico.
+Hola, soy el profesor Laura y mi especialidad es Física.
+```
+
+### Why Does This Work?
+
+Both `p1` and `p2` are declared as type `PersonaT10` — the compiler only sees the parent type. Yet at runtime each variable holds a **concrete subclass instance**. When `presentarse()` is called:
+
+1. The JVM checks the actual runtime type of the object stored in the reference.
+2. It finds the most specific override of `presentarse()` for that type.
+3. It invokes **that** implementation, ignoring the declared variable type.
+
+This mechanism — **dynamic dispatch** — is what makes polymorphism possible. Without it you would need an explicit `instanceof` check and a manual cast for every subclass, turning the call site into brittle, hard-to-extend code.
+
+### The Full `main` Method
+
+```java
+package Taller10;
+
+public class MainEjercicio1T10 {
+    public static void main(String[] args) {
+        PersonaT10 persona = new PersonaT10("Carlos");
+        EstudianteT10 estudiante = new EstudianteT10("Ana", "Ingeniería de Software");
+        ProfesorT10 profesor = new ProfesorT10("María", "Matemáticas");
+
+        System.out.println("--- Demostración de Sobrescritura y Polimorfismo (Ejercicio 1) ---");
+
+        persona.presentarse();
+        estudiante.presentarse();
+        profesor.presentarse();
+
+        System.out.println("\n--- Polimorfismo ---");
+        PersonaT10 p1 = new EstudianteT10("Pedro", "Diseño Gráfico");
+        PersonaT10 p2 = new ProfesorT10("Laura", "Física");
+
+        p1.presentarse(); // Llama al presentarse de EstudianteT10
+        p2.presentarse(); // Llama al presentarse de ProfesorT10
+    }
+}
+```
+
+The first block creates each object using its exact declared type and calls `presentarse()` directly — straightforward inheritance. The second block re-creates two of the objects as `PersonaT10` references, demonstrating that the polymorphic dispatch still reaches the subclass methods.
+
+## Compile & Run
+
+```bash
+# Compile from the project root
+javac Taller10/PersonaT10.java Taller10/EstudianteT10.java \
+      Taller10/ProfesorT10.java Taller10/MainEjercicio1T10.java
+
+# Run
+java Taller10.MainEjercicio1T10
+```
+
+**Full expected output:**
+
+```
+--- Demostración de Sobrescritura y Polimorfismo (Ejercicio 1) ---
+Hola, soy Carlos.
+Hola, soy Ana y estudio Ingeniería de Software.
+Hola, soy el profesor María y mi especialidad es Matemáticas.
+
+--- Polimorfismo ---
+Hola, soy Pedro y estudio Diseño Gráfico.
+Hola, soy el profesor Laura y mi especialidad es Física.
+```

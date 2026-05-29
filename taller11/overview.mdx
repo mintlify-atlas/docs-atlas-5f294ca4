@@ -1,0 +1,63 @@
+---
+title: "Taller 11: Abstract Classes in Java"
+sidebarTitle: "Overview"
+description: "Overview of Taller 11 — three exercises teaching abstract classes and methods: geometric figures, employee salary contracts, and combined scenarios."
+---
+
+Taller 11 introduces abstract classes — classes that define a partial implementation and force concrete subclasses to fill in the blanks via abstract methods. An abstract class acts as a contract: it may hold shared state and concrete helper methods, but one or more of its methods carry no body and are instead marked `abstract`, making it the responsibility of every concrete subclass to provide a real implementation. This pattern eliminates duplicated structure across related classes while guaranteeing that key behaviour is always customised per type.
+
+## Exercises
+
+<CardGroup cols={3}>
+  <Card title="Ejercicio 1: Figura Abstracta" icon="shapes" href="/taller11/ejercicio1-figura-abstracta">
+    Define an abstract `FiguraT11` class with an abstract `calcularArea()` method, then implement it in `CirculoT11` (π·r²) and `RectanguloT11` (base × altura).
+  </Card>
+  <Card title="Ejercicio 2: Empleado Abstracto" icon="user-tie" href="/taller11/ejercicio2-empleado-abstracto">
+    Model an abstract `Empleado` class requiring subclasses to implement `calcularSalario()`, with `Gerente` using a fixed-salary-plus-bonus formula and `Vendedor` using a commission-based formula.
+  </Card>
+  <Card title="Ejercicio 3: Mixed Scenarios" icon="layer-group" href="/taller11/ejercicio3-mixed">
+    Explore pitfalls and best practices around concrete methods inside abstract classes, demonstrating when subclasses should or must override inherited concrete behaviour.
+  </Card>
+</CardGroup>
+
+## Key Concepts
+
+| Concept | Description |
+|---|---|
+| `abstract class` | A class declared with the `abstract` keyword. It cannot be instantiated directly and may contain both abstract and concrete members. |
+| `abstract method` | A method with no body, declared inside an abstract class. Every non-abstract subclass **must** provide an implementation. |
+| Concrete subclass | A class that `extends` an abstract class and implements **all** abstract methods, making it safe to instantiate. |
+| Cannot instantiate | You can never call `new` on an abstract class. Any attempt is a **compile-time error**. |
+| Template method pattern | A concrete method in the abstract class that calls an abstract method — the base class defines the algorithm skeleton, and subclasses plug in the variable step. |
+
+### `abstract` vs Concrete at a Glance
+
+```java
+abstract class FiguraT11 {
+    // Concrete method — fully defined, inherited as-is
+    public void mostrarArea() {
+        System.out.println("El área de " + nombre + " es: " + calcularArea());
+    }
+
+    // Abstract method — no body; subclasses MUST implement this
+    public abstract double calcularArea();
+}
+```
+
+<Note>
+Attempting to instantiate an abstract class directly (e.g., `new FiguraT11(...)`) will cause a compile error: `'FiguraT11 is abstract; cannot be instantiated'`.
+</Note>
+
+## Compile & Run
+
+All classes in Taller 11 belong to the `Taller11` package. From the project root, compile every file in the package first, then run the desired `Main` class:
+
+```bash
+# Compile all Taller 11 sources
+javac Taller11/*.java
+
+# Run each exercise
+java Taller11.MainEjercicio1T11
+java Taller11.MainEjercicio2
+java Taller11.MainEjercicio3
+```
