@@ -1,7 +1,7 @@
 ---
-title: "Ejercicio 3: Mixed Abstract Class Scenarios"
+title: "Ejercicio 3: Abstract Class Pitfalls and Override Design"
 sidebarTitle: "Mixed Scenarios"
-description: "Explore additional abstract class patterns from MainEjercicio3, demonstrating combined use of abstract and concrete methods in the same hierarchy."
+description: "Explore ClaseAbstractaIncorrecta and its two subclasses to understand when concrete methods in abstract classes should be declared abstract instead."
 ---
 
 Ejercicio 3 shifts focus from the happy path to a more nuanced question: what happens when an abstract class contains a concrete method that *might* need to be overridden, but isn't declared abstract — leaving it up to the subclass to decide whether to customise it? This exercise defines `ClaseAbstractaIncorrecta` with both an abstract method (`metodoAbstracto()`) and a concrete default method (`metodoConcretoQuePodriaSobreescribirse()`), then compares two subclasses: `ImplementacionCorrecta`, which actively overrides the concrete method, and `ImplementacionOlvidadiza`, which silently inherits the default. The contrast highlights a real design pitfall that every Java developer should recognise.

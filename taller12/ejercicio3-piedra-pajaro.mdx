@@ -1,7 +1,7 @@
 ---
-title: "Ejercicio 3: Pajaro and Piedra — Selective Interface Implementation"
+title: "Ejercicio 3: Pajaro and Piedra — Selective Interfaces"
 sidebarTitle: "Pajaro & Piedra"
-description: "Compare Pajaro (which implements Cantante) with Piedra (which implements Volador), demonstrating selective interface adoption and how interfaces can be used to model surprising or ironic behavior contracts."
+description: "Explore selective interface adoption: Pajaro implements Cantante and Piedra implements Volador, each independently choosing its own interface contract."
 ---
 
 Exercise 3 uses a different set of classes in the `Taller12.Ejercicio3` package to explore which objects get which capabilities — and what happens when an interface is implemented in an unexpected or ironic way. `Pajaro` commits to singing but not flying, while `Piedra` commits to the `Volador` contract and uses its implementation to announce the obvious: a rock cannot fly. This contrast highlights the key insight that interfaces are opt-in contracts — each class independently chooses exactly which interfaces to adopt.
@@ -118,18 +118,18 @@ Note that `Taller12/Ejercicio3/` defines its own local `Volador` and `Cantante` 
 
 ## Compile & Run
 
-The `Ejercicio3` sub-package must be compiled separately from the top-level `Taller12` classes. Run all commands from the project root (the directory that contains the `Taller12/` folder):
+The `Ejercicio3` sub-package must be compiled separately from the top-level `Taller12` classes. Run all commands from the project root (the directory that contains the `Taller12/` folder).
+
+<Warning>
+`Pajaro.java` declares `implements Cantante` but provides no concrete `cantar()` method body, so it will **not compile** in its current state. Exclude it from the compile command until a `cantar()` implementation is added. Using the `*.java` wildcard will also fail for the same reason.
+</Warning>
 
 ```bash
-# Compile only the Ejercicio3 sub-package
+# Compile the compilable Ejercicio3 files (exclude the Pajaro stub)
 javac Taller12/Ejercicio3/Volador.java \
       Taller12/Ejercicio3/Cantante.java \
-      Taller12/Ejercicio3/Pajaro.java \
       Taller12/Ejercicio3/Piedra.java \
       Taller12/Ejercicio3/Main3.java
-
-# Or compile all files in the sub-package at once
-javac Taller12/Ejercicio3/*.java
 
 # Run
 java Taller12.Ejercicio3.Main3

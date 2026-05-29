@@ -1,7 +1,7 @@
 ---
-title: "Ejercicio 1: FiguraT11, CirculoT11, and RectanguloT11 — Abstract Area"
+title: "Ejercicio 1: Abstract FiguraT11 with Area Calculation"
 sidebarTitle: "Figura Abstracta"
-description: "Define an abstract FiguraT11 class with an abstract calcularArea() method, then implement it in CirculoT11 and RectanguloT11 with their respective formulas."
+description: "Define abstract class FiguraT11 with calcularArea(), then implement it in CirculoT11 using π·r² and RectanguloT11 using base × altura."
 ---
 
 Ejercicio 1 builds the simplest possible abstract class hierarchy: a geometric figure. Every figure has a name and must be able to report its area, but the formula for computing that area differs completely between a circle and a rectangle. The abstract class `FiguraT11` captures the common structure — the `nombre` field and the `mostrarArea()` display method — while delegating the actual calculation to each concrete subclass through the abstract method `calcularArea()`.

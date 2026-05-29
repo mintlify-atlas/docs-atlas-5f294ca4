@@ -1,7 +1,7 @@
 ---
-title: "Ejercicio 2: Persona and Estudiante — Constructor Chaining with super()"
+title: "Ejercicio 2: Persona and Estudiante — super() Chains"
 sidebarTitle: "Persona & Estudiante"
-description: "Extend the Persona base class with Estudiante, using super() to chain constructors and adding carrera-specific behavior."
+description: "Extend Persona with Estudiante using super() constructor chaining, overloaded constructors, and an overridden mostrarDetalles() method."
 ---
 
 Ejercicio 2 focuses on constructor chaining. `Persona` provides a two-parameter constructor that initialises `nombre` and `edad`. `Estudiante` adds `matricula` and `promedio`, and offers two overloaded constructors: one that starts `promedio` at `0.0` and a second that accepts an explicit initial average. Both constructors begin with `super(nombre, edad)`, delegating parent field initialisation to `Persona` before setting the student-specific fields. The exercise also demonstrates how inherited methods like `saludar()` and `cumplirAnios()` work unchanged on a `Estudiante` object, and how overriding `mostrarDetalles()` enables polymorphic dispatch across a `Persona[]` array.

@@ -1,7 +1,7 @@
 ---
-title: "Ejercicio 3: super Pitfalls — Private Access and Static Context"
+title: "Ejercicio 3: super Pitfalls in Private and Static Contexts"
 sidebarTitle: "super Pitfalls"
-description: "Discover two common super misuse errors: accessing private fields from a subclass and using super in a static method context."
+description: "Explore two super misuse errors in Java: accessing private parent fields from a subclass and calling super in a static method context."
 ---
 
 This exercise deliberately demonstrates two scenarios where `super` fails — understanding these errors prevents confusion when the compiler rejects seemingly reasonable code. Rather than showing only working programs, Ejercicio 3 keeps the broken lines commented in the source so you can see exactly what you must *not* write, alongside the correct alternative in each case. Both errors stem from the same root cause: `super` is a reference tied to a specific object instance, so anything that removes that instance context — a `static` method, or a `private` access barrier — makes `super` unusable.

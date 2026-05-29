@@ -1,5 +1,5 @@
 ---
-title: "Polymorphism in Java: Runtime Method Dispatch"
+title: "Java Polymorphism: Runtime Dispatch and Method Overriding"
 sidebarTitle: "Polymorphism"
 description: "Explore runtime polymorphism in Java — how the JVM dispatches method calls to the correct subclass implementation at runtime using @Override."
 ---
@@ -130,7 +130,7 @@ class ClaseDerivadaT10 extends ClaseBaseT10 {
 
     // ⚠️ This is an OVERLOAD, not an override — different signature
     public void metodoSobrescrito(int numero) {
-        System.out.println("Método sobrecargado con número: " + numero);
+        System.out.println("Método sobrecargado de ClaseDerivadaT10 con número: " + numero);
     }
 
     // This IS an override — same signature — but missing @Override (bad practice)

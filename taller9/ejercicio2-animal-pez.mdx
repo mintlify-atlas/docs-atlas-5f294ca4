@@ -1,7 +1,7 @@
 ---
 title: "Ejercicio 2: Animal and Pez — Inheritance with super"
 sidebarTitle: "Animal & Pez"
-description: "Extend Animal with Pez using super() and demonstrate how subclass-specific fields combine with inherited parent behavior."
+description: "Extend Animal with Pez using super(), demonstrate super.mostrarEspecie() delegation, and see how subclass fields layer on top of parent output."
 ---
 
 Ejercicio 2 reinforces the same `super` patterns from Ejercicio 1 in a different domain: the animal kingdom. `Animal` stores and displays a species name, while `Pez` specialises it as a fish by adding information about the type of water it lives in. The subclass constructor passes `especie` up to `Animal` via `super(especie)`, and the overridden `mostrarEspecie()` method layers `Pez`'s own output on top of the parent's output by calling `super.mostrarEspecie()` first. The result is a clean two-level display built without duplicating any logic from the parent.

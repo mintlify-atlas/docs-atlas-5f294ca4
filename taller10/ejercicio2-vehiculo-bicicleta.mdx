@@ -1,7 +1,7 @@
 ---
-title: "Ejercicio 2: VehiculoT10 and BicicletaT10 — Method Overriding"
+title: "Ejercicio 2: VehiculoT10 and BicicletaT10 Override"
 sidebarTitle: "VehiculoT10 & BicicletaT10"
-description: "Override VehiculoT10's moverse() in BicicletaT10 and observe polymorphic behavior when using a VehiculoT10 reference at runtime."
+description: "Override VehiculoT10 moverse() in BicicletaT10 and observe Java polymorphic dispatch behavior through a VehiculoT10 reference at runtime."
 ---
 
 Ejercicio 2 applies the same override-and-dispatch pattern to a vehicle domain. `VehiculoT10` provides a generic `moverse()` implementation, and `BicicletaT10` replaces it with a description that is specific to how a bicycle moves. Assigning a `BicicletaT10` instance to a `VehiculoT10` variable and then calling `moverse()` through that variable confirms that the runtime type — not the variable type — controls which implementation executes.

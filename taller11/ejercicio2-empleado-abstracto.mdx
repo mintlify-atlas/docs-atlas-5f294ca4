@@ -1,7 +1,7 @@
 ---
-title: "Ejercicio 2: Abstract Empleado with Gerente and Vendedor Salary Contracts"
+title: "Ejercicio 2: Abstract Empleado and Salary Contracts"
 sidebarTitle: "Empleado Abstracto"
-description: "Model an abstract Empleado class requiring subclasses to implement calcularSalario(), with Gerente and Vendedor providing different salary formulas."
+description: "Model abstract class Empleado with calcularSalario(), implemented by Gerente (salarioBase + bono) and Vendedor (salarioBase + comisionPorVentas)."
 ---
 
 Ejercicio 2 applies the abstract class pattern to a business domain: employee payroll. Different employee types earn their salary in fundamentally different ways — a `Gerente` receives a fixed base salary plus a discretionary bonus, while a `Vendedor` earns a base salary supplemented by a commission on sales. The abstract class `Empleado` enforces the `calcularSalario()` contract on every subclass, ensuring that any employee object can always report its salary without the caller needing to know which type it is.

@@ -1,22 +1,22 @@
 ---
-title: "Taller 8: Java Single Inheritance with extends"
+title: "Taller 8: Single Inheritance with extends in Java OOP"
 sidebarTitle: "Overview"
-description: "Overview of Taller 8 — four exercises exploring single inheritance in Java: constructor chaining, method overriding, and multiple inheritance restrictions."
+description: "Taller 8 — four exercises on Java single inheritance: constructor chaining, method overriding, and multiple inheritance restrictions."
 ---
 
 Taller 8 teaches how Java implements single inheritance using the `extends` keyword, how subclasses chain constructors with `super()`, and what happens when you try invalid inheritance patterns. By working through four progressively richer exercises you will see how a subclass inherits fields and methods, adds its own state, calls the parent constructor exactly once as the first statement, and selectively overrides behaviour while still delegating to the parent via `super`.
 
 <CardGroup cols={2}>
-  <Card title="Ejercicio 1 — Vehiculo → Coche" icon="car" href="./ejercicio1-vehiculo-coche">
+  <Card title="Ejercicio 1 — Vehiculo → Coche" icon="car" href="taller8/ejercicio1-vehiculo-coche">
     Define a `Vehiculo` base class with `protected` fields, then extend it with `Coche` which adds `numeroDePuertas` and overrides `mostrarInfo()` by delegating to `super.mostrarInfo()` before printing its own line.
   </Card>
-  <Card title="Ejercicio 2 — Persona → Estudiante" icon="user-graduate" href="./ejercicio2-persona-estudiante">
+  <Card title="Ejercicio 2 — Persona → Estudiante" icon="user-graduate" href="taller8/ejercicio2-persona-estudiante">
     Extend the `Persona` base class with `Estudiante`. Demonstrates constructor chaining with `super(nombre, edad)` and overloaded constructors that accept an optional starting `promedio`.
   </Card>
-  <Card title="Ejercicio 3 — Empleado → Gerente" icon="briefcase" href="./ejercicio3-empleado-gerente">
+  <Card title="Ejercicio 3 — Empleado → Gerente" icon="briefcase" href="taller8/ejercicio3-empleado-gerente">
     Override `calcularBono()` in `Gerente` to compute a higher bonus (15% base salary + 2% per managed employee) while inheriting all of `Empleado`'s core fields and behaviour.
   </Card>
-  <Card title="Ejercicio 4 — Multiple Inheritance Pitfalls" icon="triangle-exclamation" href="./ejercicio4-herencia-multiple">
+  <Card title="Ejercicio 4 — Multiple Inheritance Pitfalls" icon="triangle-exclamation" href="taller8/ejercicio4-herencia-multiple">
     See the exact compiler error produced by `class ClaseC extends ClaseA, ClaseB`, understand why `private` fields are invisible even inside subclasses, and learn the two correct workarounds: interfaces and getters.
   </Card>
 </CardGroup>
